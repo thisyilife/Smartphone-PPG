@@ -34,6 +34,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.android.camera.utils.GenericListAdapter
 import com.example.android.camera2.video.R
+import kotlinx.android.synthetic.main.fragment_selector.view.*
 
 /**
  * In this [Fragment] we let users pick a camera, size and FPS to use for high
@@ -45,14 +46,41 @@ class SelectorFragment : Fragment() {
             inflater: LayoutInflater,
             container: ViewGroup?,
             savedInstanceState: Bundle?
-    ): View? = RecyclerView(requireContext())
+    ):View? = inflater.inflate(R.layout.fragment_selector, container, false)
 
     @SuppressLint("MissingPermission")
     //Called immediately after onCreateView
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         Log.i("DEBUG", "Created apps !")
-        view as RecyclerView
+
+        // System service for detecting, characterizing and connecting to CameraDevice
+        val cameraManager = requireContext().getSystemService(Context.CAMERA_SERVICE) as CameraManager
+
+        // cameraList : list of every combination of resolution and FPS
+        val cameraList = enumerateVideoCameras(cameraManager)
+
+
+        view.btnCamera1.text=cameraList[0].name
+        view.btnCamera2.text = cameraList[1].name
+
+        view.btnCamera1.setOnClickListener{
+            // Send camera and flash info to the next fragment
+            Navigation.findNavController(requireActivity(), R.id.fragment_container)
+                    .navigate(SelectorFragmentDirections.actionSelectorToCamera(
+                            cameraList[0].cameraId, cameraList[0].size.width, cameraList[0].size.height, cameraList[0].fps, mFlashSupported))
+        }
+
+
+        view.btnCamera2.setOnClickListener {
+            // Send camera and flash info to the next fragment
+            Navigation.findNavController(requireActivity(), R.id.fragment_container)
+                    .navigate(SelectorFragmentDirections.actionSelectorToCamera(
+                            cameraList[1].cameraId, cameraList[1].size.width, cameraList[1].size.height, cameraList[1].fps, mFlashSupported))
+        }
+
+
+       /* view as RecyclerView
         view.apply {
             layoutManager = LinearLayoutManager(requireContext())
 
@@ -74,7 +102,7 @@ class SelectorFragment : Fragment() {
 
                 }
             }
-        }
+        }*/
     }
 
     companion object {

@@ -16,4 +16,8 @@
 <resources>
     <string name="app_name">Camera2Video</string>
     <string name="capture">Capture</string>
+    <string name="lblTitle">Sensoria Analytics</string>
+    <string name="lblChoiceCam">Choisissez la caméra avec la meilleure résolution :</string>
+    <string name="userInstructions">Une fois la caméra choisie, assurez-vous de mettre votre index sur la caméra arrière de votre smartphone comme indiqué sur l\'image suivante :</string>
+    <string name="activez_ensuite_le_flash_et_prenez_une_vid_o_sans_bouger_votre_doigt">Activez ensuite le flash et prenez une vidéo sans bouger votre doigt</string>
 </resources>
