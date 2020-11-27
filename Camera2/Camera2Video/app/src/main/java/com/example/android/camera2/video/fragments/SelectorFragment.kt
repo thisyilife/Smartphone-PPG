@@ -142,6 +142,7 @@ class SelectorFragment : Fragment() {
                         val fps = if (secondsPerFrame > 0) (1.0 / secondsPerFrame).toInt() else 0
                         val fpsLabel = if (fps > 0) "$fps" else "N/A"
                         if(facing != null && facing == CameraCharacteristics.LENS_FACING_BACK){
+                            if( ( size.height == 1080 && size.width==1920) || (size.height==720 && size.width==1280))
                             availableCameras.add(CameraInfo(
                                     "$orientation ($id) $size $fpsLabel FPS", id, size, fps))
                         }
