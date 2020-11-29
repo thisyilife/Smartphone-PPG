@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".controller.BloodAnalysisActivity"
+    android:orientation="vertical">
+
+    <androidx.camera.view.PreviewView
+        android:id="@+id/activity_blood_analysis_preview"
+        android:layout_width="match_parent"
+        android:layout_weight="4"
+        android:layout_height="0dp"
+        android:layout_margin="10dp"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="3"
+        android:layout_margin="10dp"
+
+        android:text="Reserved to plot graph"
+        android:textColor="@color/white"
+        android:background="@color/black"/>
+
+    <TextView
+        android:id="@+id/activity_blood_analysis_info_txt"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_margin="10dp"
+        android:text="@string/activity_blood_analysis_info_txt"/>
+
+    <Button
+        android:id="@+id/activity_blood_analysis_start_button"
+        android:text="@string/activity_blood_analysis_start_button"
+        android:layout_width="match_parent"
+        android:layout_weight="1"
+        android:layout_height="0dp"
+        android:layout_margin="10dp"/>
+
+</LinearLayout>
