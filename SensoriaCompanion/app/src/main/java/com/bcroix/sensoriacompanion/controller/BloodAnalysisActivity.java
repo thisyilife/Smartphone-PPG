@@ -1,7 +1,12 @@
 package com.bcroix.sensoriacompanion.controller;
 
+import android.annotation.SuppressLint;
 import android.graphics.Color;
+import android.media.Image;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.util.Size;
 import android.view.View;
 import android.widget.Button;
@@ -22,6 +27,7 @@ import androidx.core.content.ContextCompat;
 import androidx.lifecycle.LifecycleOwner;
 
 import com.bcroix.sensoriacompanion.R;
+import com.bcroix.sensoriacompanion.model.ImageProcessing;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import java.util.Random;
@@ -37,15 +43,26 @@ public class BloodAnalysisActivity extends AppCompatActivity {
 
     // members relevant to cameraX
     private ListenableFuture<ProcessCameraProvider> mCameraProviderFuture;
+    // Handle for the image analysis thread
+    private Handler mImageAnalysisHandler;
+    static final int UI_ENABLE_ANALYSIS_BUTTON = 0;
+    static final int UI_DISABLE_ANALYSIS_BUTTON = 1;
+
+    // model members
+    private ImageProcessing mImageProcessing;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_blood_analysis);
 
+        // Define model members
+        mImageProcessing = new ImageProcessing();
+
         // Bind view elements
         mPreviewView = findViewById(R.id.activity_blood_analysis_preview);
         mStartButton = findViewById(R.id.activity_blood_analysis_start_button);
         mStartButton.setBackgroundColor(Color.GREEN);
+        mStartButton.setEnabled(false);
         mAnalysisIsActive = false;
         mInfoText = findViewById(R.id.activity_blood_analysis_info_txt);
         mInfoText.setText(String.format(getString(R.string.activity_blood_analysis_info_txt), 0));
@@ -67,24 +84,6 @@ public class BloodAnalysisActivity extends AppCompatActivity {
             }
         });
 
-        // Configure image analysis object
-        ImageAnalysis imageAnalysis =
-                new ImageAnalysis.Builder()
-                        .setTargetResolution(new Size(1280, 720))
-                        // Non blocking mode : if the computation takes longer than the framerate, then frames will be dropped
-                        .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                        .build();
-        imageAnalysis.setAnalyzer(Executors.newSingleThreadExecutor(), new ImageAnalysis.Analyzer() {
-            @Override
-            public void analyze(@NonNull ImageProxy image) {
-                // TODO : insert code here : the following line is an example
-                mInfoText.setText(String.format(getString(R.string.activity_blood_analysis_info_txt), new Random().nextInt((image.getWidth() + 1))));
-
-                // Close image to allow to take other frames
-                image.close();
-            }
-        });
-
         // Provide a camera to recover images
         mCameraProviderFuture = ProcessCameraProvider.getInstance(this);
         mCameraProviderFuture.addListener(() -> {
@@ -93,24 +92,73 @@ public class BloodAnalysisActivity extends AppCompatActivity {
                 ProcessCameraProvider cameraProvider = mCameraProviderFuture.get();
                 // Unbind use cases before rebinding
                 cameraProvider.unbindAll();
-                bindPreviewAndAnalysis(cameraProvider, imageAnalysis);
+                bindPreviewAndAnalysis(cameraProvider);
             } catch (ExecutionException | InterruptedException e) {
                 // No errors need to be handled for this Future.
                 // This should never be reached.
             }
         }, ContextCompat.getMainExecutor(this));
+
+        // Specify what the image analysis handler
+        mImageAnalysisHandler = new Handler (Looper.getMainLooper()) {
+            @Override
+            public void handleMessage(Message msg) {
+                switch (msg.what) {
+                    case UI_ENABLE_ANALYSIS_BUTTON:
+                        mStartButton.setEnabled(true);
+                        break;
+                    case UI_DISABLE_ANALYSIS_BUTTON:
+                        mStartButton.setEnabled(false);
+                        break;
+                }
+            }
+        };
     }
 
-    void bindPreviewAndAnalysis(@NonNull ProcessCameraProvider cameraProvider, ImageAnalysis imageAnalysis) {
+    void bindPreviewAndAnalysis(@NonNull ProcessCameraProvider cameraProvider) {
+        // Configure preview settings
         Preview preview = new Preview.Builder()
                 .build();
+        // Configure image analysis settings
+        ImageAnalysis imageAnalysis =
+                new ImageAnalysis.Builder()
+                        .setTargetResolution(new Size(1280, 720))
+                        // Non blocking mode : if the computation takes longer than the framerate, then frames will be dropped
+                        .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                        .build();
+        // Define the analysis itself
+        imageAnalysis.setAnalyzer(Executors.newSingleThreadExecutor(), new ImageAnalysis.Analyzer() {
+            @SuppressLint("UnsafeExperimentalUsageError")
+            @Override
+            public void analyze(@NonNull ImageProxy image) {
+                Image img = image.getImage();
+                // If the analysis is not running yet
+                if(!mAnalysisIsActive){
+                    // Enable Analysis Button if the image is valid
+                    if(ImageProcessing.isImageValid(img)){
+                        mImageAnalysisHandler.obtainMessage(UI_ENABLE_ANALYSIS_BUTTON).sendToTarget();
+                    }else{
+                        mImageAnalysisHandler.obtainMessage(UI_DISABLE_ANALYSIS_BUTTON).sendToTarget();
+                    }
+                }else{
+                    // The analysis is running :
+                    mImageProcessing.process(img);
+                }
 
+                // Close image to allow to take other frames
+                image.close();
+            }
+        });
+
+        // Select the back camera
         CameraSelector cameraSelector = new CameraSelector.Builder()
                 .requireLensFacing(CameraSelector.LENS_FACING_BACK)
                 .build();
 
+        // Link preview from the UI layout
         preview.setSurfaceProvider(mPreviewView.getSurfaceProvider());
 
+        // Bind all use cases
         Camera camera = cameraProvider.bindToLifecycle((LifecycleOwner)this, cameraSelector, imageAnalysis, preview);
 
         // Turn on flashlight
