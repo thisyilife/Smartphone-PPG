@@ -1,7 +1,9 @@
 <resources>
     <string name="app_name">SensoriaCompanion</string>
+
     <string name="activity_main_welcome_msg">Welcome on Sensoria Companion, please choose one of the following options.</string>
-    <string name="activity_main_blood_analysis_button">Blood analysis</string>
+    <string name="activity_main_blood_analysis_menu_button">Blood analysis</string>
+    <string name="activity_main_statistics_menu_button">Statistics history</string>
 
     <string name="activity_blood_analysis_start_button">Start analysis</string>
     <string name="activity_blood_analysis_stop_button">Stop analysis</string>
