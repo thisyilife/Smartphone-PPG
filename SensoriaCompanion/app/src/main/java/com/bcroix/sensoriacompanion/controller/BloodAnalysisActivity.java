@@ -11,11 +11,9 @@ import android.util.Size;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.camera.camera2.internal.annotation.CameraExecutor;
 import androidx.camera.core.Camera;
 import androidx.camera.core.CameraSelector;
 import androidx.camera.core.ImageAnalysis;
@@ -27,10 +25,11 @@ import androidx.core.content.ContextCompat;
 import androidx.lifecycle.LifecycleOwner;
 
 import com.bcroix.sensoriacompanion.R;
-import com.bcroix.sensoriacompanion.model.ImageProcessing;
+import com.bcroix.sensoriacompanion.model.BloodAnalysisSession;
+import com.bcroix.sensoriacompanion.model.FrameInfo;
 import com.google.common.util.concurrent.ListenableFuture;
 
-import java.util.Random;
+import java.time.Instant;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 
@@ -49,14 +48,11 @@ public class BloodAnalysisActivity extends AppCompatActivity {
     static final int UI_DISABLE_ANALYSIS_BUTTON = 1;
 
     // model members
-    private ImageProcessing mImageProcessing;
+    private BloodAnalysisSession mBloodAnalysisSession;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_blood_analysis);
-
-        // Define model members
-        mImageProcessing = new ImageProcessing();
 
         // Bind view elements
         mPreviewView = findViewById(R.id.activity_blood_analysis_preview);
@@ -77,6 +73,8 @@ public class BloodAnalysisActivity extends AppCompatActivity {
                     mStartButton.setBackgroundColor(Color.GREEN);
                     // TODO : save results ?
                 }else{
+                    // Define new image processing item
+                    mBloodAnalysisSession = new BloodAnalysisSession();
                     mAnalysisIsActive = true;
                     mStartButton.setText(R.string.activity_blood_analysis_stop_button);
                     mStartButton.setBackgroundColor(Color.RED);
@@ -131,18 +129,22 @@ public class BloodAnalysisActivity extends AppCompatActivity {
             @SuppressLint("UnsafeExperimentalUsageError")
             @Override
             public void analyze(@NonNull ImageProxy image) {
+                // Recover image
                 Image img = image.getImage();
+                // Recover instant
+                Instant now = Instant.now();
                 // If the analysis is not running yet
                 if(!mAnalysisIsActive){
+                    FrameInfo currentFrameInfo = new FrameInfo(Instant.now());
                     // Enable Analysis Button if the image is valid
-                    if(ImageProcessing.isImageValid(img)){
+                    if(currentFrameInfo.fillInfo(img)){
                         mImageAnalysisHandler.obtainMessage(UI_ENABLE_ANALYSIS_BUTTON).sendToTarget();
                     }else{
                         mImageAnalysisHandler.obtainMessage(UI_DISABLE_ANALYSIS_BUTTON).sendToTarget();
                     }
                 }else{
                     // The analysis is running :
-                    mImageProcessing.process(img);
+                    mBloodAnalysisSession.process(img, now);
                 }
 
                 // Close image to allow to take other frames
