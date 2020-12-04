@@ -3,6 +3,7 @@ package com.bcroix.sensoriacompanion.model;
 import android.media.Image;
 
 import java.time.Instant;
+import java.util.Random;
 
 public class FrameInfo {
     /**
@@ -15,9 +16,16 @@ public class FrameInfo {
      */
     private int mRedMean;
 
-
     public FrameInfo(Instant instant){
         mInstant = instant;
+    }
+
+    public Instant getInstant() {
+        return mInstant;
+    }
+
+    public int getRedMean() {
+        return mRedMean;
     }
 
     /**
@@ -27,7 +35,7 @@ public class FrameInfo {
      */
     public boolean fillInfo(Image image){
         //TODO : following code is a dummy
-        mRedMean = 128;
+        mRedMean = new Random().nextInt(255 + 1);;
         return true;
     }
 }

@@ -2,6 +2,8 @@
 title Model class Diagram
 
 class BloodAnalysisSession{
+    - {static} DEFAULT_ANALYSIS_DURATION : Duration
+    ----
     + BloodAnalysisSession()
     + process(image : Image, instant : Instant) : boolean
     ....
@@ -9,8 +11,9 @@ class BloodAnalysisSession{
     + getFramesInfo(duration : Duration) : FrameInfo[]
     ....
     + getDuration() : Duration
-    + getHeartbeat() : int
-    + getHeartbeat(duration : Duration) : int
+    + getHeartbeatAverage() : double
+    + getHeartbeatLast() : double
+    + getHeartbeatAt(duration : Duration) : int
     ....
     + {static} loadSession(TODO) : BloodAnalysisSession
     + saveSession(TODO) : boolean

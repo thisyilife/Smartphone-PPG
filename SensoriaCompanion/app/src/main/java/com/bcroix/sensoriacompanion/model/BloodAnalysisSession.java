@@ -6,8 +6,15 @@ import android.media.Image;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import java.util.Random;
 
 public class BloodAnalysisSession {
+
+    /**
+     * The Default duration required to perform an analysis
+     */
+    static final Duration DEFAULT_ANALYSIS_DURATION = Duration.ofSeconds(15);
+
     /**
      * Ordered collection of all frameInfo since the beginning of the session
      */
@@ -15,6 +22,10 @@ public class BloodAnalysisSession {
 
     public BloodAnalysisSession(){
         //TODO : maybe complete constructor
+    }
+
+    public List<FrameInfo> getFramesInfo() {
+        return mFramesInfo;
     }
 
     /**
@@ -29,5 +40,32 @@ public class BloodAnalysisSession {
         boolean res = current.fillInfo(image);
         mFramesInfo.add(current);
         return res;
+    }
+
+    /**
+     * Compute average heartbeat on the whole analysis session
+     * @return average heartbeat value in beats per minute
+     */
+    public double getHeartbeatAverage(){
+        // TODO : put relevant code, following one is a dummy
+        return new Random().nextInt(120 + 1);
+    }
+
+    /**
+     * Compute heartbeat at the instant of the last frameInfo
+     * @return heartbeat value in beats per minute
+     */
+    public double getHeartbeatLast(){
+        // TODO : put relevant code, following one is a dummy
+        return new Random().nextInt(120 + 1);
+    }
+
+    /**
+     * Compute heartbeat at a given instant
+     * @return heartbeat value in beats per minute
+     */
+    public double getHeartbeatAt(Instant instant){
+        // TODO : put relevant code, following one is a dummy
+        return new Random().nextInt(120 + 1);
     }
 }
