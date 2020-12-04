@@ -46,4 +46,7 @@ dependencies {
     implementation "androidx.camera:camera-lifecycle:${camerax_version}"
     // If you want to additionally use the CameraX View class
     implementation "androidx.camera:camera-view:1.0.0-alpha19"
+
+    // In order to plot simple graphs
+    implementation 'com.jjoe64:graphview:4.2.2'
 }

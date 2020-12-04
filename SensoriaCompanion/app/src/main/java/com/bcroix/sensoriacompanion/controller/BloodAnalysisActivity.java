@@ -28,6 +28,7 @@ import com.bcroix.sensoriacompanion.R;
 import com.bcroix.sensoriacompanion.model.BloodAnalysisSession;
 import com.bcroix.sensoriacompanion.model.FrameInfo;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.jjoe64.graphview.GraphView;
 
 import java.time.Instant;
 import java.util.concurrent.ExecutionException;
@@ -38,6 +39,7 @@ public class BloodAnalysisActivity extends AppCompatActivity {
     private PreviewView mPreviewView;
     private Button mStartButton;
     private boolean mAnalysisIsActive;
+    private GraphView mGraphView;
     private TextView mInfoText;
 
     // members relevant to cameraX
@@ -46,6 +48,7 @@ public class BloodAnalysisActivity extends AppCompatActivity {
     private Handler mImageAnalysisHandler;
     static final int UI_ENABLE_ANALYSIS_BUTTON = 0;
     static final int UI_DISABLE_ANALYSIS_BUTTON = 1;
+    static final int UI_UPDATE_GRAPH = 2;
 
     // model members
     private BloodAnalysisSession mBloodAnalysisSession;
@@ -60,6 +63,8 @@ public class BloodAnalysisActivity extends AppCompatActivity {
         mStartButton.setBackgroundColor(Color.GREEN);
         mStartButton.setEnabled(false);
         mAnalysisIsActive = false;
+        mGraphView = findViewById(R.id.activity_blood_analysis_graph);
+        mGraphView.setVisibility(View.VISIBLE);
         mInfoText = findViewById(R.id.activity_blood_analysis_info_txt);
         mInfoText.setText(String.format(getString(R.string.activity_blood_analysis_info_txt), 0));
 
@@ -97,7 +102,7 @@ public class BloodAnalysisActivity extends AppCompatActivity {
             }
         }, ContextCompat.getMainExecutor(this));
 
-        // Specify what the image analysis handler
+        // Specify the image analysis handler to modify GUI from analyze function
         mImageAnalysisHandler = new Handler (Looper.getMainLooper()) {
             @Override
             public void handleMessage(Message msg) {
@@ -107,6 +112,9 @@ public class BloodAnalysisActivity extends AppCompatActivity {
                         break;
                     case UI_DISABLE_ANALYSIS_BUTTON:
                         mStartButton.setEnabled(false);
+                        break;
+                    case UI_UPDATE_GRAPH:
+                        mGraphView.addSeries(GraphTools.FrameInfoArrayToLineGraph(mBloodAnalysisSession.getFramesInfo()));
                         break;
                 }
             }
@@ -145,6 +153,8 @@ public class BloodAnalysisActivity extends AppCompatActivity {
                 }else{
                     // The analysis is running :
                     mBloodAnalysisSession.process(img, now);
+                    // Update GUI
+                    mImageAnalysisHandler.obtainMessage(UI_UPDATE_GRAPH).sendToTarget();
                 }
 
                 // Close image to allow to take other frames
