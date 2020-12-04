@@ -5,6 +5,7 @@ import android.media.Image;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -18,13 +19,14 @@ public class BloodAnalysisSession {
     /**
      * Ordered collection of all frameInfo since the beginning of the session
      */
-    List<FrameInfo> mFramesInfo;
+    ArrayList<FrameInfo> mFramesInfo;
 
     public BloodAnalysisSession(){
         //TODO : maybe complete constructor
+        mFramesInfo = new ArrayList<FrameInfo>();
     }
 
-    public List<FrameInfo> getFramesInfo() {
+    public ArrayList<FrameInfo> getFramesInfo() {
         return mFramesInfo;
     }
 
