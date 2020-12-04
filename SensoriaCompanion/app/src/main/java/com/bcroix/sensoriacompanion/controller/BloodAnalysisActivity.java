@@ -27,8 +27,10 @@ import androidx.lifecycle.LifecycleOwner;
 import com.bcroix.sensoriacompanion.R;
 import com.bcroix.sensoriacompanion.model.BloodAnalysisSession;
 import com.bcroix.sensoriacompanion.model.FrameInfo;
+import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.jjoe64.graphview.GraphView;
 
 import java.time.Instant;
 import java.util.concurrent.ExecutionException;
@@ -39,7 +41,7 @@ public class BloodAnalysisActivity extends AppCompatActivity {
     private PreviewView mPreviewView;
     private Button mStartButton;
     private boolean mAnalysisIsActive;
-    private GraphView mGraphView;
+    private LineChart mLineChart;
     private TextView mInfoText;
 
     // members relevant to cameraX
@@ -63,8 +65,12 @@ public class BloodAnalysisActivity extends AppCompatActivity {
         mStartButton.setBackgroundColor(Color.GREEN);
         mStartButton.setEnabled(false);
         mAnalysisIsActive = false;
-        mGraphView = findViewById(R.id.activity_blood_analysis_graph);
-        mGraphView.setVisibility(View.VISIBLE);
+        mLineChart = findViewById(R.id.activity_blood_analysis_graph);
+        mLineChart.getDescription().setEnabled(false);
+        mLineChart.setTouchEnabled(false);
+        mLineChart.setDragEnabled(false);
+        mLineChart.setScaleEnabled(false);
+        mLineChart.setPinchZoom(false);
         mInfoText = findViewById(R.id.activity_blood_analysis_info_txt);
         mInfoText.setText(String.format(getString(R.string.activity_blood_analysis_info_txt), 0));
 
@@ -114,7 +120,15 @@ public class BloodAnalysisActivity extends AppCompatActivity {
                         mStartButton.setEnabled(false);
                         break;
                     case UI_UPDATE_GRAPH:
-                        mGraphView.addSeries(GraphTools.FrameInfoArrayToLineGraph(mBloodAnalysisSession.getFramesInfo()));
+                        // Plot Red Mean
+                        LineDataSet dataSet = new LineDataSet(GraphTools.FrameInfoArrayToListEntry(mBloodAnalysisSession.getFramesInfo()), "Red mean");
+                        dataSet.setColor(Color.RED);
+                        dataSet.setValueTextColor(Color.RED);
+                        dataSet.setDrawCircles(false);
+                        LineData lineData = new LineData(dataSet);
+                        mLineChart.setData(lineData);
+                        // Refresh
+                        mLineChart.invalidate();
                         break;
                 }
             }
@@ -155,6 +169,7 @@ public class BloodAnalysisActivity extends AppCompatActivity {
                     mBloodAnalysisSession.process(img, now);
                     // Update GUI
                     mImageAnalysisHandler.obtainMessage(UI_UPDATE_GRAPH).sendToTarget();
+
                 }
 
                 // Close image to allow to take other frames

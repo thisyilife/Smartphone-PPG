@@ -1,20 +1,21 @@
 package com.bcroix.sensoriacompanion.controller;
 
 import com.bcroix.sensoriacompanion.model.FrameInfo;
-import com.jjoe64.graphview.series.DataPoint;
-import com.jjoe64.graphview.series.LineGraphSeries;
+import com.github.mikephil.charting.data.Entry;
 
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.List;
 
 public class GraphTools {
-    static LineGraphSeries<DataPoint> FrameInfoArrayToLineGraph(ArrayList<FrameInfo> frameInfoArray){
-        DataPoint[] tab = new DataPoint[frameInfoArray.size()];
-
-        for(int i = 0; i<frameInfoArray.size(); i++){
-            tab[i] = new DataPoint(frameInfoArray.get(i).getInstant().toEpochMilli(), frameInfoArray.get(i).getRedMean());
+    static List<Entry> FrameInfoArrayToListEntry(ArrayList<FrameInfo> frameInfoArray){
+        // Recover number of milliseconds of first FrameInfo
+        long minMillis = frameInfoArray.get(0).getInstant().toEpochMilli();
+        // Fill Array of entries
+        List<Entry> entries = new ArrayList<Entry>();
+        for (FrameInfo f : frameInfoArray) {
+            // turn your data into Entry objects
+            entries.add(new Entry(f.getInstant().toEpochMilli()-minMillis, f.getRedMean()));
         }
-
-        return new LineGraphSeries<>(tab);
+        return entries;
     }
 }
