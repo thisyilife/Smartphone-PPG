@@ -3,6 +3,7 @@ package com.bcroix.sensoriacompanion.model;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.PixelFormat;
 import android.media.Image;
 
 import java.nio.ByteBuffer;
@@ -35,6 +36,10 @@ public class FrameInfo {
      */
     private int mRedMean;
 
+    /**
+     * The threshold of the frame's red channel
+     */
+    private int mThreshold;
 
     /**
      * Function to get frame information
@@ -60,6 +65,33 @@ public class FrameInfo {
         return mRedMean;
     }
 
+    /**
+     * Getter for the red channel intensity
+     * @return the min and max intensity of the red channel in an array
+     */
+    public int[] getMinMaxIntensity(Bitmap bitImage){
+        int pixel = 0;
+        int maxRedIntensity=0;
+        int minRedIntensity=255;
+        int[] minMaxRedIntensity = new int[2];
+        for(int y = 0; y < mHeight; y++){
+            for(int x = 0; x < mWidth; x++){
+                pixel = bitImage.getPixel(x,y);
+                if(Color.red(pixel) >maxRedIntensity)
+                    maxRedIntensity = Color.red(pixel);
+                if(Color.red(pixel) <minRedIntensity)
+                    minRedIntensity = Color.red(pixel);
+            }
+        }
+        minMaxRedIntensity[0]=minRedIntensity;
+        minMaxRedIntensity[1]=maxRedIntensity;
+        return minMaxRedIntensity;
+    }
+
+    public void setThreshold(Bitmap bitImage)
+    {
+        mThreshold = (int)0.99*(getMinMaxIntensity(bitImage)[1] -getMinMaxIntensity(bitImage)[0]);
+    }
 
     /**
      * Fill all members with relevant information, according to the given image
@@ -70,7 +102,6 @@ public class FrameInfo {
         // Get image info and set threshold for valid capture
         mWidth = image.getWidth();
         mHeight = image.getHeight();
-        int threshold = 128;
         int R = 0, G = 0, B = 0;
         int pixel = 0;
         // Convert the image to Bitmap to allow pixel operation
@@ -79,20 +110,22 @@ public class FrameInfo {
         buffer.get(bytes);
         Bitmap bitImage = BitmapFactory.decodeByteArray(bytes, 0, bytes.length, null);
 
+        // compute threshold of the red channel
+        setThreshold(bitImage);
         // We can now go through pixel operation with bitImage
         for(int y = 0; y < mHeight; y++){
             for(int x = 0; x < mWidth; x++){
                 pixel = bitImage.getPixel(x,y);
                 R += Color.red(pixel);
-                // G = Color.green(pixel);
-                // B = Color.blue(pixel);
+                //G += Color.green(pixel);
+                //B += Color.blue(pixel);
             }
         }
 
         // compute red mean of the image,
         // if its greater than threshold then its a valid capture
         mRedMean = R / (mWidth * mHeight);
-        if(mRedMean > threshold){
+        if(mRedMean > mThreshold){
             return true;
         }
 
