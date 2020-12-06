@@ -17,6 +17,8 @@ public class BloodAnalysisSession {
      */
     List<FrameInfo> mFramesInfo;
 
+    private int mCardiacCycle;
+
     public BloodAnalysisSession(){
         //TODO : maybe complete constructor
     }
@@ -29,12 +31,18 @@ public class BloodAnalysisSession {
      */
     public boolean process(Image image, Instant instant) {
         // TODO : maybe complete method
-        int mHeight = image.getHeight();
-        int mWidth = image.getWidth();
-
         FrameInfo current = new FrameInfo(instant);
         boolean res = current.fillInfo(image);
         mFramesInfo.add(current);
         return res;
+    }
+
+    public void computeCycle()
+    {
+        for (FrameInfo frame : mFramesInfo)
+        {
+            //TODO: compute the number of frames per cycle
+            // the difference between two minima will define the cardiac cycle
+        }
     }
 }

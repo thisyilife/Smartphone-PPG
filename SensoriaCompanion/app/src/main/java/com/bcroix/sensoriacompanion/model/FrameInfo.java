@@ -63,6 +63,14 @@ public class FrameInfo {
     }
 
     /**
+     *  Getter for mSumRedIntensity
+     * @return the current frame's sum red intensity
+     */
+    public int getSumRedIntensity(){
+        return mSumRedIntensity;
+    }
+
+    /**
      * Getter for mRedMean
      * @return the red level of a frame
      */
