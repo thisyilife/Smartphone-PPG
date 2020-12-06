@@ -1,6 +1,8 @@
 package com.bcroix.sensoriacompanion.controller;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.media.Image;
 import android.os.Bundle;
@@ -21,6 +23,7 @@ import androidx.camera.core.ImageProxy;
 import androidx.camera.core.Preview;
 import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.camera.view.PreviewView;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.LifecycleOwner;
 
@@ -40,6 +43,9 @@ public class BloodAnalysisActivity extends AppCompatActivity {
     private boolean mAnalysisIsActive;
     private TextView mInfoText;
 
+    // Permission code
+    private static final int CAMERA_PERMISSION_CODE = 100;
+
     // members relevant to cameraX
     private ListenableFuture<ProcessCameraProvider> mCameraProviderFuture;
     // Handle for the image analysis thread
@@ -54,6 +60,9 @@ public class BloodAnalysisActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_blood_analysis);
 
+        //Check permissions
+        checkPermission(Manifest.permission.CAMERA, CAMERA_PERMISSION_CODE);
+
         // Bind view elements
         mPreviewView = findViewById(R.id.activity_blood_analysis_preview);
         mStartButton = findViewById(R.id.activity_blood_analysis_start_button);
@@ -62,6 +71,7 @@ public class BloodAnalysisActivity extends AppCompatActivity {
         mAnalysisIsActive = false;
         mInfoText = findViewById(R.id.activity_blood_analysis_info_txt);
         mInfoText.setText(String.format(getString(R.string.activity_blood_analysis_info_txt), 0));
+
 
         // Add actions for button
         mStartButton.setOnClickListener(new View.OnClickListener() {
@@ -111,6 +121,19 @@ public class BloodAnalysisActivity extends AppCompatActivity {
                 }
             }
         };
+    }
+
+    // Function to check and request permission.
+    public void checkPermission(String permission, int requestCode)
+    {
+        if (ContextCompat.checkSelfPermission(BloodAnalysisActivity.this, permission)
+                == PackageManager.PERMISSION_DENIED) {
+
+            // Requesting the permission
+            ActivityCompat.requestPermissions(BloodAnalysisActivity.this,
+                    new String[] { permission },
+                    requestCode);
+        }
     }
 
     void bindPreviewAndAnalysis(@NonNull ProcessCameraProvider cameraProvider) {
