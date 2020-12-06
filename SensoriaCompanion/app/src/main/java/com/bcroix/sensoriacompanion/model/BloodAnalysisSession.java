@@ -32,14 +32,6 @@ public class BloodAnalysisSession {
         int mHeight = image.getHeight();
         int mWidth = image.getWidth();
 
-        // Convert image to Bitmap
-        ByteBuffer buffer = image.getPlanes()[0].getBuffer();
-        byte[] bytes = new byte[buffer.capacity()];
-        buffer.get(bytes);
-        Bitmap bitImage = BitmapFactory.decodeByteArray(bytes, 0, bytes.length, null);
-
-
-
         FrameInfo current = new FrameInfo(instant);
         boolean res = current.fillInfo(image);
         mFramesInfo.add(current);

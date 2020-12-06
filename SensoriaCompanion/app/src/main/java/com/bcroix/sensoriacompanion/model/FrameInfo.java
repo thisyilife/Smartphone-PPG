@@ -42,6 +42,11 @@ public class FrameInfo {
     private int mThreshold;
 
     /**
+     * sum of pixels with intensity greater than the computed threshold
+     */
+    private int mSumRedIntensity;
+
+    /**
      * Function to get frame information
      * @param instant the instant when the frame is sent
      */
@@ -87,12 +92,28 @@ public class FrameInfo {
         minMaxRedIntensity[1]=maxRedIntensity;
         return minMaxRedIntensity;
     }
-
+    /**
+     * Fill all members with relevant information, according to the given image
+     * @param bitImage of the frame
+     * @return the threshold of the intensity of the red channel
+     */
     public void setThreshold(Bitmap bitImage)
     {
         mThreshold = (int)0.99*(getMinMaxIntensity(bitImage)[1] -getMinMaxIntensity(bitImage)[0]);
     }
 
+    public void computeSumIntensities(Bitmap bitImage)
+    {
+        mSumRedIntensity=0;
+        int pixel =0;
+        for(int y = 0; y < mHeight; y++){
+            for(int x = 0; x < mWidth; x++){
+                pixel = bitImage.getPixel(x,y);
+                if (Color.red(pixel) >= mThreshold)
+                    mSumRedIntensity += Color.red(pixel);
+            }
+        }
+    }
     /**
      * Fill all members with relevant information, according to the given image
      * @param image the frame to process
@@ -102,6 +123,7 @@ public class FrameInfo {
         // Get image info and set threshold for valid capture
         mWidth = image.getWidth();
         mHeight = image.getHeight();
+        int minExpectedThreshold = 50;
         int R = 0, G = 0, B = 0;
         int pixel = 0;
         // Convert the image to Bitmap to allow pixel operation
@@ -112,23 +134,14 @@ public class FrameInfo {
 
         // compute threshold of the red channel
         setThreshold(bitImage);
-        // We can now go through pixel operation with bitImage
-        for(int y = 0; y < mHeight; y++){
-            for(int x = 0; x < mWidth; x++){
-                pixel = bitImage.getPixel(x,y);
-                R += Color.red(pixel);
-                //G += Color.green(pixel);
-                //B += Color.blue(pixel);
-            }
-        }
 
-        // compute red mean of the image,
-        // if its greater than threshold then its a valid capture
-        mRedMean = R / (mWidth * mHeight);
-        if(mRedMean > mThreshold){
-            return true;
+        // if its greater than min expected threshold then its a valid capture
+        if(mThreshold < minExpectedThreshold){
+            return false;
         }
+        // compute the sum of the intensities greater than the defined threshold
+        computeSumIntensities(bitImage);
 
-        return false;
+        return true;
     }
 }
