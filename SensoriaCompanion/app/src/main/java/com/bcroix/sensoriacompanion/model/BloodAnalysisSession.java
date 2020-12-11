@@ -70,4 +70,3 @@ public class BloodAnalysisSession {
         // TODO : put relevant code, following one is a dummy
         return new Random().nextInt(120 + 1);
     }
-}
