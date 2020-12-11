@@ -84,7 +84,7 @@ public class FrameInfo {
      * Getter for mRedMean
      * @return the red level of a frame
      */
-    public int getmRedMean(){
+    public int getRedMean(){
         return mRedMean;
     }
 
@@ -92,7 +92,7 @@ public class FrameInfo {
      * Getter for mRedMean
      * @return the red level of a frame
      */
-    public int getmBlueMean(){
+    public int getBlueMean(){
         return mBlueMean;
     }
 
@@ -100,7 +100,7 @@ public class FrameInfo {
      * Getter for mRedMean
      * @return the red level of a frame
      */
-    public int getmGreenMean(){
+    public int getGreenMean(){
         return mGreenMean;
     }
 
@@ -143,7 +143,6 @@ public class FrameInfo {
         for(int y = 0; y < mHeight; y++){
             for(int x = 0; x < mWidth; x++){
                 pixel = bitImage.getPixel(x,y);
-                mRedMean +=
                 if (Color.red(pixel) >= mThreshold)
                     mSumRedIntensity += Color.red(pixel);
             }

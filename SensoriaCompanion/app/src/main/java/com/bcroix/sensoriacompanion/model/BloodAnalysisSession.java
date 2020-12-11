@@ -21,7 +21,7 @@ public class BloodAnalysisSession {
      */
     ArrayList<FrameInfo> mFramesInfo;
 
-    public BloodAnalysisSession(){
+    public BloodAnalysisSession() {
         //TODO : maybe complete constructor
         mFramesInfo = new ArrayList<FrameInfo>();
     }
@@ -32,7 +32,8 @@ public class BloodAnalysisSession {
 
     /**
      * Processes the input image and save results for this frame
-     * @param image the input image
+     *
+     * @param image   the input image
      * @param instant the instant at which the image was captured
      * @return true if all went well
      */
@@ -46,27 +47,31 @@ public class BloodAnalysisSession {
 
     /**
      * Compute average heartbeat on the whole analysis session
+     *
      * @return average heartbeat value in beats per minute
      */
-    public double getHeartbeatAverage(){
+    public double getHeartbeatAverage() {
         // TODO : put relevant code, following one is a dummy
         return new Random().nextInt(120 + 1);
     }
 
     /**
      * Compute heartbeat at the instant of the last frameInfo
+     *
      * @return heartbeat value in beats per minute
      */
-    public double getHeartbeatLast(){
+    public double getHeartbeatLast() {
         // TODO : put relevant code, following one is a dummy
         return new Random().nextInt(120 + 1);
     }
 
     /**
      * Compute heartbeat at a given instant
+     *
      * @return heartbeat value in beats per minute
      */
-    public double getHeartbeatAt(Instant instant){
+    public double getHeartbeatAt(Instant instant) {
         // TODO : put relevant code, following one is a dummy
         return new Random().nextInt(120 + 1);
     }
+}
