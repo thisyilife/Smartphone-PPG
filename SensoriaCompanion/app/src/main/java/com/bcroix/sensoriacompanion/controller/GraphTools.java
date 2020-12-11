@@ -11,10 +11,10 @@ public class GraphTools {
         // Recover number of milliseconds of first FrameInfo
         long minMillis = frameInfoArray.get(0).getInstant().toEpochMilli();
         // Fill Array of entries
-        List<Entry> entries = new ArrayList<Entry>();
+        List<Entry> entries = new ArrayList<>();
         for (FrameInfo f : frameInfoArray) {
             // turn your data into Entry objects
-            entries.add(new Entry(f.getInstant().toEpochMilli()-minMillis, f.getRedMean()));
+            entries.add(new Entry((float)(f.getInstant().toEpochMilli()-minMillis)/1000, f.getRedMean()));
         }
         return entries;
     }
