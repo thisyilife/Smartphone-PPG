@@ -14,7 +14,7 @@ public class BloodAnalysisSession {
     /**
      * The Default duration required to perform an analysis
      */
-    static final Duration DEFAULT_ANALYSIS_DURATION = Duration.ofSeconds(15);
+    public static final Duration DEFAULT_ANALYSIS_DURATION = Duration.ofSeconds(15);
 
     /**
      * Ordered collection of all frameInfo since the beginning of the session
@@ -42,6 +42,18 @@ public class BloodAnalysisSession {
         boolean res = current.fillInfo(image);
         mFramesInfo.add(current);
         return res;
+    }
+
+    /**
+     * Computes the duration between first and last frames
+     * @return Duration
+     */
+    public Duration getDuration() {
+        if(mFramesInfo.size() > 1){
+            return Duration.between(mFramesInfo.get(0).getInstant(), mFramesInfo.get(mFramesInfo.size() -1).getInstant());
+        }else{
+            return Duration.ZERO;
+        }
     }
 
     /**
