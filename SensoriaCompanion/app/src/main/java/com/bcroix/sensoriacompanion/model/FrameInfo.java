@@ -37,6 +37,16 @@ public class FrameInfo {
     private int mRedMean;
 
     /**
+     * The mean of the frame's red channel
+     */
+    private int mGreenMean;
+
+    /**
+     * The mean of the frame's red channel
+     */
+    private int mBlueMean;
+
+    /**
      * The threshold of the frame's red channel
      */
     private int mThreshold;
@@ -79,6 +89,22 @@ public class FrameInfo {
     }
 
     /**
+     * Getter for mRedMean
+     * @return the red level of a frame
+     */
+    public int getmBlueMean(){
+        return mBlueMean;
+    }
+
+    /**
+     * Getter for mRedMean
+     * @return the red level of a frame
+     */
+    public int getmGreenMean(){
+        return mGreenMean;
+    }
+
+    /**
      * Getter for the red channel intensity
      * @return the min and max intensity of the red channel in an array
      */
@@ -117,11 +143,39 @@ public class FrameInfo {
         for(int y = 0; y < mHeight; y++){
             for(int x = 0; x < mWidth; x++){
                 pixel = bitImage.getPixel(x,y);
+                mRedMean +=
                 if (Color.red(pixel) >= mThreshold)
                     mSumRedIntensity += Color.red(pixel);
             }
         }
     }
+
+    /**
+     * Function to compute the mean of every pixel
+     * @param bitImage, image captured by the camera
+     */
+    public void computeFrameMean(Bitmap bitImage){
+        int pixel = 0;
+        mRedMean = 0;
+        mGreenMean = 0;
+        mBlueMean = 0;
+        // Get R,G,B pixel value
+        for(int y = 0; y < mHeight; y++){
+            for(int x = 0; x < mWidth; x++){
+                pixel = bitImage.getPixel(x,y);
+                mRedMean += Color.red(pixel);
+                mGreenMean += Color.green(pixel);
+                mBlueMean += Color.blue(pixel);
+            }
+        }
+        // Divide every value by the size of the frame to get the mean
+        mRedMean /= (mWidth * mHeight);
+        mGreenMean /= (mWidth * mHeight);
+        mBlueMean /= (mWidth * mHeight);
+    }
+
+
+
     /**
      * Fill all members with relevant information, according to the given image
      * @param image the frame to process
@@ -132,8 +186,6 @@ public class FrameInfo {
         mWidth = image.getWidth();
         mHeight = image.getHeight();
         int minExpectedThreshold = 50;
-        int R = 0, G = 0, B = 0;
-        int pixel = 0;
         // Convert the image to Bitmap to allow pixel operation
         ByteBuffer buffer = image.getPlanes()[0].getBuffer();
         byte[] bytes = new byte[buffer.capacity()];
