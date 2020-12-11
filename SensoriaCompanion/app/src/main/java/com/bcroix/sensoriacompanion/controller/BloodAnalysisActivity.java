@@ -30,6 +30,9 @@ import androidx.lifecycle.LifecycleOwner;
 import com.bcroix.sensoriacompanion.R;
 import com.bcroix.sensoriacompanion.model.BloodAnalysisSession;
 import com.bcroix.sensoriacompanion.model.FrameInfo;
+import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import java.time.Instant;
@@ -41,6 +44,7 @@ public class BloodAnalysisActivity extends AppCompatActivity {
     private PreviewView mPreviewView;
     private Button mStartButton;
     private boolean mAnalysisIsActive;
+    private LineChart mLineChart;
     private TextView mInfoText;
 
     // Permission code
@@ -52,6 +56,7 @@ public class BloodAnalysisActivity extends AppCompatActivity {
     private Handler mImageAnalysisHandler;
     static final int UI_ENABLE_ANALYSIS_BUTTON = 0;
     static final int UI_DISABLE_ANALYSIS_BUTTON = 1;
+    static final int UI_UPDATE_GRAPH = 2;
 
     // model members
     private BloodAnalysisSession mBloodAnalysisSession;
@@ -69,6 +74,8 @@ public class BloodAnalysisActivity extends AppCompatActivity {
         mStartButton.setBackgroundColor(Color.GREEN);
         mStartButton.setEnabled(false);
         mAnalysisIsActive = false;
+        mLineChart = findViewById(R.id.activity_blood_analysis_graph);
+        mLineChart.getDescription().setEnabled(false);
         mInfoText = findViewById(R.id.activity_blood_analysis_info_txt);
         mInfoText.setText(String.format(getString(R.string.activity_blood_analysis_info_txt), 0));
 
@@ -79,6 +86,12 @@ public class BloodAnalysisActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if(mAnalysisIsActive){
                     mAnalysisIsActive = false;
+                    // Enable all options on graph while analysis is active
+                    mLineChart.setTouchEnabled(true);
+                    mLineChart.setDragEnabled(true);
+                    mLineChart.setScaleXEnabled(true);
+                    mLineChart.setPinchZoom(true);
+                    // Modify appearance of button
                     mStartButton.setText(R.string.activity_blood_analysis_start_button);
                     mStartButton.setBackgroundColor(Color.GREEN);
                     // TODO : save results ?
@@ -86,6 +99,12 @@ public class BloodAnalysisActivity extends AppCompatActivity {
                     // Define new image processing item
                     mBloodAnalysisSession = new BloodAnalysisSession();
                     mAnalysisIsActive = true;
+                    // Disable all options on graph while analysis is active
+                    mLineChart.setTouchEnabled(false);
+                    mLineChart.setDragEnabled(false);
+                    mLineChart.setScaleEnabled(false);
+                    mLineChart.setPinchZoom(false);
+                    // Modify appearance of button
                     mStartButton.setText(R.string.activity_blood_analysis_stop_button);
                     mStartButton.setBackgroundColor(Color.RED);
                 }
@@ -107,7 +126,7 @@ public class BloodAnalysisActivity extends AppCompatActivity {
             }
         }, ContextCompat.getMainExecutor(this));
 
-        // Specify what the image analysis handler
+        // Specify the image analysis handler to modify GUI from analyze function
         mImageAnalysisHandler = new Handler (Looper.getMainLooper()) {
             @Override
             public void handleMessage(Message msg) {
@@ -117,6 +136,16 @@ public class BloodAnalysisActivity extends AppCompatActivity {
                         break;
                     case UI_DISABLE_ANALYSIS_BUTTON:
                         mStartButton.setEnabled(false);
+                        break;
+                    case UI_UPDATE_GRAPH:
+                        // Plot Red Mean
+                        LineDataSet dataSet = new LineDataSet(GraphTools.FrameInfoArrayToListEntry(mBloodAnalysisSession.getFramesInfo()), "Red mean");
+                        dataSet.setColor(Color.RED);
+                        dataSet.setValueTextColor(Color.RED);
+                        dataSet.setDrawCircles(false);
+                        mLineChart.setData(new LineData(dataSet));
+                        // Refresh
+                        mLineChart.invalidate();
                         break;
                 }
             }
@@ -168,6 +197,9 @@ public class BloodAnalysisActivity extends AppCompatActivity {
                 }else{
                     // The analysis is running :
                     mBloodAnalysisSession.process(img, now);
+                    // Update GUI
+                    mImageAnalysisHandler.obtainMessage(UI_UPDATE_GRAPH).sendToTarget();
+
                 }
 
                 // Close image to allow to take other frames
@@ -184,7 +216,7 @@ public class BloodAnalysisActivity extends AppCompatActivity {
         preview.setSurfaceProvider(mPreviewView.getSurfaceProvider());
 
         // Bind all use cases
-        Camera camera = cameraProvider.bindToLifecycle((LifecycleOwner)this, cameraSelector, imageAnalysis, preview);
+        Camera camera = cameraProvider.bindToLifecycle(this, cameraSelector, imageAnalysis, preview);
 
         // Turn on flashlight
         camera.getCameraControl().enableTorch(true);
