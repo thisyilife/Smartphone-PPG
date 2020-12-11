@@ -1,26 +1,33 @@
 package com.bcroix.sensoriacompanion.model;
 
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.media.Image;
 
-import java.nio.ByteBuffer;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
-
+import java.util.Random;
 
 public class BloodAnalysisSession {
+
+    /**
+     * The Default duration required to perform an analysis
+     */
+    static final Duration DEFAULT_ANALYSIS_DURATION = Duration.ofSeconds(15);
+
     /**
      * Ordered collection of all frameInfo since the beginning of the session
      */
-    List<FrameInfo> mFramesInfo;
-
-    private int mCardiacCycle;
+    ArrayList<FrameInfo> mFramesInfo;
 
     public BloodAnalysisSession(){
         //TODO : maybe complete constructor
+        mFramesInfo = new ArrayList<FrameInfo>();
+    }
+
+    public ArrayList<FrameInfo> getFramesInfo() {
+        return mFramesInfo;
     }
 
     /**
@@ -37,12 +44,29 @@ public class BloodAnalysisSession {
         return res;
     }
 
-    public void computeCycle()
-    {
-        for (FrameInfo frame : mFramesInfo)
-        {
-            //TODO: compute the number of frames per cycle
-            // the difference between two minima will define the cardiac cycle
-        }
+    /**
+     * Compute average heartbeat on the whole analysis session
+     * @return average heartbeat value in beats per minute
+     */
+    public double getHeartbeatAverage(){
+        // TODO : put relevant code, following one is a dummy
+        return new Random().nextInt(120 + 1);
     }
-}
+
+    /**
+     * Compute heartbeat at the instant of the last frameInfo
+     * @return heartbeat value in beats per minute
+     */
+    public double getHeartbeatLast(){
+        // TODO : put relevant code, following one is a dummy
+        return new Random().nextInt(120 + 1);
+    }
+
+    /**
+     * Compute heartbeat at a given instant
+     * @return heartbeat value in beats per minute
+     */
+    public double getHeartbeatAt(Instant instant){
+        // TODO : put relevant code, following one is a dummy
+        return new Random().nextInt(120 + 1);
+    }
