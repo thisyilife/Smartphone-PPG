@@ -37,7 +37,7 @@
         android:layout_height="0dp"
         android:layout_margin="10dp"
         android:layout_weight="1"
-        android:text="@string/btntutorial" />
+        android:text="@string/activity_main_tutorial_menu_button" />
 
 
 

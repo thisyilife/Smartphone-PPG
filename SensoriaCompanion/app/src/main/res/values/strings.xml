@@ -4,9 +4,12 @@
     <string name="activity_main_welcome_msg">Welcome on Sensoria Companion, please choose one of the following options.</string>
     <string name="activity_main_blood_analysis_menu_button">Blood analysis</string>
     <string name="activity_main_statistics_menu_button">Statistics history</string>
+    <string name="activity_main_tutorial_menu_button">Tutorial</string>
 
     <string name="activity_blood_analysis_start_button">Start analysis</string>
     <string name="activity_blood_analysis_stop_button">Stop analysis</string>
     <string name="activity_blood_analysis_info_txt">Your heartbeat is currently %1$d beats per minute</string>
-    <string name="btntutorial">Tutorial</string>
+    <string name="activity_blood_analysis_no_data_graph_txt">Please start an analysis in order to plot graphs</string>
+    <string name="activity_blood_analysis_save_success_toast">Analysis session successfully saved !</string>
+    <string name="activity_blood_analysis_save_failure_toast">Analysis session aborted</string>
 </resources>
