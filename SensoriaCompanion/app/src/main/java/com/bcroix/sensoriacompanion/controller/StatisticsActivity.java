@@ -21,6 +21,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static android.preference.PreferenceManager.getDefaultSharedPreferences;
+
 public class StatisticsActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
 
     // View members
@@ -39,7 +41,7 @@ public class StatisticsActivity extends AppCompatActivity implements AdapterView
         setContentView(R.layout.activity_statistics);
 
         mViewKeyList = (ListView) findViewById(R.id.mViewKeyList);
-        mPreferences = getPreferences(MODE_PRIVATE);
+        mPreferences = getDefaultSharedPreferences(getApplicationContext());
         mKeyList = new ArrayList<>(mPreferences.getAll().keySet());
         ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
                 this,

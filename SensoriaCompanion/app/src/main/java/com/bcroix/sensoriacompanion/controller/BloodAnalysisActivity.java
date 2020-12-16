@@ -41,6 +41,8 @@ import java.time.Instant;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 
+import static android.preference.PreferenceManager.getDefaultSharedPreferences;
+
 public class BloodAnalysisActivity extends AppCompatActivity {
     // View members
     private PreviewView mPreviewView;
@@ -232,7 +234,7 @@ public class BloodAnalysisActivity extends AppCompatActivity {
      */
     void saveAnalysisSession(){
         if(mBloodAnalysisSession.getDuration().compareTo(BloodAnalysisSession.DEFAULT_ANALYSIS_DURATION) >= 0){
-            SharedPreferences  pref = getPreferences(MODE_PRIVATE);
+            SharedPreferences  pref = getDefaultSharedPreferences(getApplicationContext());
             SharedPreferences.Editor prefsEditor = pref.edit();
             Gson gson = new Gson();
             String json = gson.toJson(mBloodAnalysisSession);
