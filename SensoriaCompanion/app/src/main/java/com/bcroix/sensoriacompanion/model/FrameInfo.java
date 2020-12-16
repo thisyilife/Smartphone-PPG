@@ -9,10 +9,13 @@ import android.graphics.Color;
 import android.graphics.ImageFormat;
 import android.graphics.PixelFormat;
 import android.media.Image;
+import android.provider.MediaStore;
 import android.telephony.ims.ImsManager;
 import android.util.Log;
 import android.renderscript.ScriptIntrinsicYuvToRGB;
 import android.widget.SimpleAdapter;
+
+import androidx.camera.core.internal.utils.ImageUtil;
 
 import java.nio.ByteBuffer;
 import java.time.Instant;
@@ -218,20 +221,22 @@ public class FrameInfo {
 
         computeFrameMean(bitImage);
 
-        /*
+
         // Example to print value in the console
         Log.d("DEBUG", "R pixel : " + mRedMean);
         Log.d("DEBUG", "G pixel : " + mGreenMean);
         Log.d("DEBUG", "B pixel : " + mBlueMean);
-         */
+
 
         // compute threshold of the red channel
         setThreshold(bitImage);
 
         // if its greater than min expected threshold then its a valid capture
+
         if(mThreshold < minExpectedThreshold){
             return false;
         }
+
         // compute the sum of the intensities greater than the defined threshold
         computeSumIntensities(bitImage);
 
@@ -269,13 +274,16 @@ public class FrameInfo {
         // Variable for visibility
         int R = 0, G = 0, B = 0;
         int yValue, vValue, uValue;
-        // Int array to be converted to Bitmap
-        int[] argbArray = new int[mHeight * mWidth];
 
         ByteBuffer y = image.getPlanes()[0].getBuffer();
         ByteBuffer u = image.getPlanes()[1].getBuffer();
         ByteBuffer v = image.getPlanes()[2].getBuffer();
+
+
+        // Int array to be converted to Bitmap
+        int[] argbArray = new int[y.capacity()];
         // Going through every elements of our array to compute RGB value from YUV
+
         for(int i = 0; i < y.capacity(); i++){
             // Increment uvIndex every 2 steps
             if(i%2 == 1){
