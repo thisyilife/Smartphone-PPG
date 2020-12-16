@@ -156,7 +156,7 @@ public class FrameInfo {
      */
     public void setThreshold(Bitmap bitImage)
     {
-        mThreshold = (int)0.99*(getMinMaxIntensity(bitImage)[1] -getMinMaxIntensity(bitImage)[0]);
+        mThreshold = (int) (0.99*(getMinMaxIntensity(bitImage)[1] -getMinMaxIntensity(bitImage)[0]));
     }
 
     public void computeSumIntensities(Bitmap bitImage)
@@ -232,11 +232,10 @@ public class FrameInfo {
         setThreshold(bitImage);
 
         // if its greater than min expected threshold then its a valid capture
-
+        Log.d("DEBUG", "Threshold value : " + mThreshold);
         if(mThreshold < minExpectedThreshold){
             return false;
         }
-
         // compute the sum of the intensities greater than the defined threshold
         computeSumIntensities(bitImage);
 
