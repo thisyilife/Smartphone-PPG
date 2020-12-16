@@ -1,3 +1,6 @@
+
+
+
 package com.bcroix.sensoriacompanion.model;
 
 import android.graphics.Bitmap;
@@ -9,6 +12,8 @@ import android.media.Image;
 import android.telephony.ims.ImsManager;
 import android.util.Log;
 import android.renderscript.ScriptIntrinsicYuvToRGB;
+import android.widget.SimpleAdapter;
+
 import java.nio.ByteBuffer;
 import java.time.Instant;
 
@@ -207,23 +212,28 @@ public class FrameInfo {
         // Convert the image to Bitmap to allow pixel operation
         Log.d("DEBUG", "image format :" + image.getFormat());
 
-        ByteBuffer y = image.getPlanes()[0].getBuffer();
-        ByteBuffer u = image.getPlanes()[1].getBuffer();
-        ByteBuffer v = image.getPlanes()[2].getBuffer();
-
         // Use android import to convert much faster than hand-approach
         // Get YUV channel to buffer
-        convertYUVToBitmap(image);
+        Bitmap bitImage = convertYUVToBitmap(image);
+
+        computeFrameMean(bitImage);
+
+        /*
+        // Example to print value in the console
+        Log.d("DEBUG", "R pixel : " + mRedMean);
+        Log.d("DEBUG", "G pixel : " + mGreenMean);
+        Log.d("DEBUG", "B pixel : " + mBlueMean);
+         */
 
         // compute threshold of the red channel
-        //setThreshold(bitImage);
+        setThreshold(bitImage);
 
         // if its greater than min expected threshold then its a valid capture
-        /*if(mThreshold < minExpectedThreshold){
+        if(mThreshold < minExpectedThreshold){
             return false;
-        }*/
+        }
         // compute the sum of the intensities greater than the defined threshold
-        //computeSumIntensities(bitImage);
+        computeSumIntensities(bitImage);
 
         return true;
     }
@@ -233,66 +243,70 @@ public class FrameInfo {
      * @param image input to be converted
      * @return bitimage, the converted bitmap image
      */
-    public void convertYUVToBitmap(Image image) {
+    public Bitmap convertYUVToBitmap(Image image) {
         // retrieve the number of ByteBuffers needed to represent the image
         int format = image.getFormat();
-        float R,G,B;
-        R = 0; G = 0; B = 0;
-        float yValue, vValue, uValue;
+
+        switch (format) {
+            case ImageFormat.YUV_420_888:
+                return yuv420ToBitmap(image);
+
+            default:
+                // Return a Bitmap with 0 value for every pixel if format not supported
+                return Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.ARGB_8888);
+        }
+    }
+
+    /**
+     * Convert a yuv_420_888 image type to Bitmap type
+     * @param image to be converted
+     * @return The bitmap from the input image
+     */
+    Bitmap yuv420ToBitmap(Image image){
+        int pixelStride = image.getPlanes()[1].getRowStride(); // Pixel stride to get to next line
+        int uvIndex = 0;          // Corresponding to u and v format index, smaller array
+        boolean loopback = true;  // Variable to get back to the first element to complete 2x2 blocs
+        // Variable for visibility
+        int R = 0, G = 0, B = 0;
+        int yValue, vValue, uValue;
+        // Int array to be converted to Bitmap
+        int[] argbArray = new int[mHeight * mWidth];
+
         ByteBuffer y = image.getPlanes()[0].getBuffer();
         ByteBuffer u = image.getPlanes()[1].getBuffer();
         ByteBuffer v = image.getPlanes()[2].getBuffer();
-
-        // other format can be added
-        switch (format) {
-            case ImageFormat.YUV_420_888:
-                Log.d("Debug","case YUV");
-                int pixelStride = image.getPlanes()[1].getRowStride(); // Pixel stride to get to next line
-                int uvIndex = 0; // Corresponding to u and v format index, smaller array
-                boolean loopback = true; // Variable to get back to the first element to complete 2x2 blocs
-
-                // Going through every elements of our array to compute RGB value from YUV
-                for(int i = 0; i < y.capacity(); i++){
-                    // Increment uvIndex every 2 steps
-                    if(i%2 == 1){
-                        uvIndex++;
-                    }
-                    // Go back to the first element of our table if necessary
-                    if(uvIndex == pixelStride){
-                        if (loopback){
-                            uvIndex -= pixelStride - 1;
-                            loopback = false;
-                        }
-                        else {
-                            loopback = true;
-                        }
-                    }
-
-                    yValue = y.get(i) ;
-                    uValue = u.get(uvIndex);
-                    vValue = v.get(uvIndex);
-                    // Clamp to get value between [0:255]
-
-                    R += clamp(yValue + (1.370705 * (vValue-128)), 0, 255);
-                    G += clamp(yValue - (0.698001 * (vValue-128)) - (0.337633 * (uValue-128)),0, 255);
-                    B += clamp(yValue + (1.732446 * (uValue-128)),0,255);
+        // Going through every elements of our array to compute RGB value from YUV
+        for(int i = 0; i < y.capacity(); i++){
+            // Increment uvIndex every 2 steps
+            if(i%2 == 1){
+                uvIndex++;
+            }
+            // Go back to the first element of our table if necessary
+            if(uvIndex == pixelStride){
+                if (loopback){
+                    uvIndex -= pixelStride - 1;
+                    loopback = false;
                 }
+                else {
+                    loopback = true;
+                }
+            }
 
-                mRedMean = (int) R/(mHeight*mWidth);
-                mGreenMean = (int) G/(mHeight*mWidth);
-                mBlueMean = (int) B/(mHeight*mWidth);
+            /* YUV is positive, & 0xff result in unsigned value */
+            yValue = (y.get(i) & 0xff);
+            uValue = (u.get(uvIndex) & 0xff);
+            vValue = (v.get(uvIndex) & 0xff);
 
-                Log.d("DEBUG", "Red pixel : " + mRedMean);
-                Log.d("DEBUG", "Green pixel : " + mGreenMean);
-                Log.d("DEBUG", "Blue pixel : " + mBlueMean);
-                break;
+            // Clamp to get value between [0:255]
+            // YUV used in camera 2 API is JFIF YUV colorspace, the correct formula is :
+            R = (int) clamp(yValue + (1.402 * (vValue-128)), 0, 255);
+            G = (int) clamp(yValue - (0.71414 * (vValue-128)) - (0.34414 * (uValue-128)),0, 255);
+            B = (int) clamp(yValue + (1.772 * (uValue-128)),0,255);
 
-            default:
-                break;
+            // Alpha channel set to 255, 8 bits for every other values
+            argbArray[i] = (255 << 24) | (R & 255) << 16 | (G & 255) << 8 | (B & 255);
         }
-       // return null;
+        return Bitmap.createBitmap(argbArray, mWidth, mHeight, Bitmap.Config.ARGB_8888);
     }
-
-
 
 }
