@@ -10,6 +10,6 @@
     <string name="activity_blood_analysis_stop_button">Stop analysis</string>
     <string name="activity_blood_analysis_info_txt">Your heartbeat is currently %1$d beats per minute</string>
     <string name="activity_blood_analysis_no_data_graph_txt">Please start an analysis in order to plot graphs</string>
-    <string name="activity_blood_analysis_save_success_toast">Analysis session successfully saved !</string>
+    <string name="activity_blood_analysis_save_success_toast">Analysis session %s successfully saved !</string>
     <string name="activity_blood_analysis_save_failure_toast">Analysis session aborted</string>
 </resources>

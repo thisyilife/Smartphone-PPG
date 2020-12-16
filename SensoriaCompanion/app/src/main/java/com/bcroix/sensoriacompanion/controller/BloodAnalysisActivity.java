@@ -238,10 +238,11 @@ public class BloodAnalysisActivity extends AppCompatActivity {
             SharedPreferences.Editor prefsEditor = pref.edit();
             Gson gson = new Gson();
             String json = gson.toJson(mBloodAnalysisSession);
-            prefsEditor.putString(mBloodAnalysisSession.getFramesInfo().get(0).toString(), json);
+            String key = mBloodAnalysisSession.getFramesInfo().get(0).getInstant().toString();
+            prefsEditor.putString(key, json);
             prefsEditor.apply();
             // Send message to user
-            Toast.makeText(BloodAnalysisActivity.this, getString(R.string.activity_blood_analysis_save_success_toast), Toast.LENGTH_SHORT).show();
+            Toast.makeText(BloodAnalysisActivity.this, String.format(getString(R.string.activity_blood_analysis_save_success_toast), key), Toast.LENGTH_SHORT).show();
         }else{
             // Send message to user
             Toast.makeText(BloodAnalysisActivity.this, getString(R.string.activity_blood_analysis_save_failure_toast), Toast.LENGTH_SHORT).show();
