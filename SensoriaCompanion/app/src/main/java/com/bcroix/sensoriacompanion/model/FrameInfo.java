@@ -60,7 +60,7 @@ public class FrameInfo {
     /**
      * The threshold of the frame's red channel
      */
-    private int mThreshold;
+    private float mThreshold;
 
     /**
      * sum of pixels with intensity greater than the computed threshold
@@ -156,7 +156,7 @@ public class FrameInfo {
      */
     public void setThreshold(Bitmap bitImage)
     {
-        mThreshold = (int)0.99*(getMinMaxIntensity(bitImage)[1] -getMinMaxIntensity(bitImage)[0]);
+        mThreshold = 0.99f*(getMinMaxIntensity(bitImage)[1] - getMinMaxIntensity(bitImage)[0]);
     }
 
     /**
