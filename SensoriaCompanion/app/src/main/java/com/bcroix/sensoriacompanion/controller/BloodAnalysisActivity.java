@@ -49,6 +49,7 @@ public class BloodAnalysisActivity extends AppCompatActivity {
     private Button mStartButton;
     private boolean mAnalysisIsActive;
     private LineChart mRedLineChart;
+    private TextView mAnalysisParamText;
     private TextView mInfoText;
 
     // Permission code
@@ -61,6 +62,8 @@ public class BloodAnalysisActivity extends AppCompatActivity {
     static final int UI_ENABLE_ANALYSIS_BUTTON = 0;
     static final int UI_DISABLE_ANALYSIS_BUTTON = 1;
     static final int UI_UPDATE_GRAPH = 2;
+    static final int UI_UPDATE_FPS_VALUE = 3;
+    static final String UI_UPDATE_FPS_VALUE_KEY = "fps";
 
     // model members
     private BloodAnalysisSession mBloodAnalysisSession;
@@ -83,6 +86,8 @@ public class BloodAnalysisActivity extends AppCompatActivity {
         mRedLineChart.setNoDataText(getString(R.string.activity_blood_analysis_no_data_graph_txt));
         mInfoText = findViewById(R.id.activity_blood_analysis_info_txt);
         mInfoText.setText(String.format(getString(R.string.activity_blood_analysis_info_txt), 0));
+        mAnalysisParamText = findViewById(R.id.activity_blood_analysis_param_txt);
+        mAnalysisParamText.setText(String.format(getString(R.string.activity_blood_analysis_param_txt), 0f));
 
         // Add actions for button
         mStartButton.setOnClickListener(new View.OnClickListener() {
@@ -154,6 +159,9 @@ public class BloodAnalysisActivity extends AppCompatActivity {
                         // Refresh
                         mRedLineChart.invalidate();
                         break;
+                    case UI_UPDATE_FPS_VALUE:
+                        mAnalysisParamText.setText(String.format(getString(R.string.activity_blood_analysis_param_txt), Float.parseFloat(msg.getData().getString(UI_UPDATE_FPS_VALUE_KEY))));
+                        break;
                 }
             }
         };
@@ -192,6 +200,12 @@ public class BloodAnalysisActivity extends AppCompatActivity {
                 Image img = image.getImage();
                 // Recover instant
                 Instant now = Instant.now();
+                // Send fps to main thread
+                Bundle bundle = new Bundle();
+                bundle.putString(UI_UPDATE_FPS_VALUE_KEY, Float.toString(computeFPS(now)));
+                Message msg = mImageAnalysisHandler.obtainMessage(UI_UPDATE_FPS_VALUE);
+                msg.setData(bundle);
+                mImageAnalysisHandler.sendMessage(msg);
                 // If the analysis is not running yet
                 if(!mAnalysisIsActive){
                     FrameInfo currentFrameInfo = new FrameInfo(Instant.now());
@@ -247,6 +261,23 @@ public class BloodAnalysisActivity extends AppCompatActivity {
             // Send message to user
             Toast.makeText(BloodAnalysisActivity.this, getString(R.string.activity_blood_analysis_save_failure_toast), Toast.LENGTH_SHORT).show();
         }
+    }
+
+    /**
+     * The epoch of the last captured frame, only used to compute fps
+     */
+    public static long lastInstantMilli = Instant.now().toEpochMilli();
+
+    /**
+     * Computes the frame rate according to the given instant
+     * @param now the most recent capture instant
+     * @return Frame rate in Hz
+     */
+    float computeFPS(Instant now){
+        long nowMilli = now.toEpochMilli();
+        float res = 1e3f/(nowMilli-lastInstantMilli);
+        lastInstantMilli = nowMilli;
+        return res;
     }
 
     @Override
