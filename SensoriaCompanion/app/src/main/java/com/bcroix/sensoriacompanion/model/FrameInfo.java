@@ -156,7 +156,7 @@ public class FrameInfo {
      */
     public void setThreshold(Bitmap bitImage)
     {
-        mThreshold = (int) (0.99*(getMinMaxIntensity(bitImage)[1] -getMinMaxIntensity(bitImage)[0]));
+        mThreshold = (int)0.99*(getMinMaxIntensity(bitImage)[1] -getMinMaxIntensity(bitImage)[0]);
     }
 
     public void computeSumIntensities(Bitmap bitImage)
@@ -219,7 +219,7 @@ public class FrameInfo {
         // Get YUV channel to buffer
         Bitmap bitImage = convertYUVToBitmap(image);
 
-        computeFrameMean(bitImage);
+        //computeFrameMean(bitImage);
 
 
         // Example to print value in the console
@@ -232,10 +232,11 @@ public class FrameInfo {
         setThreshold(bitImage);
 
         // if its greater than min expected threshold then its a valid capture
-        Log.d("DEBUG", "Threshold value : " + mThreshold);
+
         if(mThreshold < minExpectedThreshold){
-            return false;
+            //return false;
         }
+
         // compute the sum of the intensities greater than the defined threshold
         computeSumIntensities(bitImage);
 
@@ -310,9 +311,17 @@ public class FrameInfo {
             G = (int) clamp(yValue - (0.71414 * (vValue-128)) - (0.34414 * (uValue-128)),0, 255);
             B = (int) clamp(yValue + (1.772 * (uValue-128)),0,255);
 
+            mRedMean += R;
+            mGreenMean += G;
+            mBlueMean += B;
+
             // Alpha channel set to 255, 8 bits for every other values
             argbArray[i] = (255 << 24) | (R & 255) << 16 | (G & 255) << 8 | (B & 255);
         }
+
+        mRedMean /= (mWidth * mHeight);
+        mGreenMean /= (mWidth * mHeight);
+        mBlueMean /= (mWidth * mHeight);
         return Bitmap.createBitmap(argbArray, mWidth, mHeight, Bitmap.Config.ARGB_8888);
     }
 
