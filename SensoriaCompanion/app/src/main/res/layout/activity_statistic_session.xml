@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".controller.StatisticSession"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/activity_statistic_session_info_txt"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_margin="10dp"
+        android:text="@string/activity_statistic_session_info_txt"/>
+
+    <com.github.mikephil.charting.charts.LineChart
+        android:id="@+id/activity_statistic_session_graph"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="2"
+        android:layout_margin="10dp"/>
+
+
+</LinearLayout>
