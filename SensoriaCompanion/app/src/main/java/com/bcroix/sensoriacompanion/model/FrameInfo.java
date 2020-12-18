@@ -159,6 +159,15 @@ public class FrameInfo {
         mThreshold = (int)0.99*(getMinMaxIntensity(bitImage)[1] -getMinMaxIntensity(bitImage)[0]);
     }
 
+    /**
+     * Return PPG value, used to compute heartbeat
+     * @return PPG value
+     */
+    public float getPPGValue()
+    {
+        return mSumRedIntensity;
+    }
+
     public void computeSumIntensities(Bitmap bitImage)
     {
         mSumRedIntensity=0;

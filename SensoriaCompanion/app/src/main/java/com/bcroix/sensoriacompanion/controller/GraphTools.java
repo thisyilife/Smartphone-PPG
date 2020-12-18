@@ -14,7 +14,7 @@ public class GraphTools {
         List<Entry> entries = new ArrayList<>();
         for (FrameInfo f : frameInfoArray) {
             // turn your data into Entry objects
-            entries.add(new Entry((float)(f.getInstant().toEpochMilli()-minMillis)/1000, f.getRedMean()));
+            entries.add(new Entry((float)(f.getInstant().toEpochMilli()-minMillis)/1000, f.getPPGValue()));
         }
         return entries;
     }
