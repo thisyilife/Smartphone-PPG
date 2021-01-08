@@ -4,28 +4,19 @@
 package com.bcroix.sensoriacompanion.model;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.ImageFormat;
-import android.graphics.PixelFormat;
 import android.media.Image;
-import android.provider.MediaStore;
-import android.telephony.ims.ImsManager;
 import android.util.Log;
-import android.renderscript.ScriptIntrinsicYuvToRGB;
-import android.widget.SimpleAdapter;
-
-import androidx.camera.core.internal.utils.ImageUtil;
 
 import java.nio.ByteBuffer;
-import java.time.Instant;
 
 
 public class FrameInfo {
     /**
-     * The instant to which the information is relevant, at which the frame was taken
+     * The instant to which the information is relevant, in nanoseconds from epoch
      */
-    private Instant mInstant;
+    private long mTimestamp;
 
     /**
      * The current camera fps
@@ -68,19 +59,11 @@ public class FrameInfo {
     private int mSumRedIntensity;
 
     /**
-     * Function to get frame information
-     * @param instant the instant when the frame is sent
+     *  Getter for mTimestamp
+     * @return the frame's timestamp
      */
-    public FrameInfo(Instant instant){
-        mInstant = instant;
-    }
-
-    /**
-     *  Getter for mInstant
-     * @return the current frame's instant
-     */
-    public Instant getInstant(){
-        return mInstant;
+    public long getTimestamp(){
+        return mTimestamp;
     }
 
     /**
@@ -219,6 +202,7 @@ public class FrameInfo {
         // Get image info and set threshold for valid capture
         mWidth = image.getWidth();
         mHeight = image.getHeight();
+        mTimestamp = image.getTimestamp();
         int minExpectedThreshold = 50;
 
         // Convert the image to Bitmap to allow pixel operation

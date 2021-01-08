@@ -6,7 +6,6 @@ import android.media.Image;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
 public class BloodAnalysisSession {
@@ -14,7 +13,7 @@ public class BloodAnalysisSession {
     /**
      * The Default duration required to perform an analysis
      */
-    public static final Duration DEFAULT_ANALYSIS_DURATION = Duration.ofSeconds(15);
+    public static final long DEFAULT_ANALYSIS_DURATION = (long)15e9;
 
     /**
      * Ordered collection of all frameInfo since the beginning of the session
@@ -34,12 +33,11 @@ public class BloodAnalysisSession {
      * Processes the input image and save results for this frame
      *
      * @param image   the input image
-     * @param instant the instant at which the image was captured
      * @return true if all went well
      */
-    public boolean process(Image image, Instant instant) {
+    public boolean process(Image image) {
         // TODO : maybe complete method
-        FrameInfo current = new FrameInfo(instant);
+        FrameInfo current = new FrameInfo();
         boolean res = current.fillInfo(image);
         mFramesInfo.add(current);
         return res;
@@ -47,13 +45,13 @@ public class BloodAnalysisSession {
 
     /**
      * Computes the duration between first and last frames
-     * @return Duration
+     * @return Duration in nanoseconds
      */
-    public Duration getDuration() {
+    public long getDuration() {
         if(mFramesInfo.size() > 1){
-            return Duration.between(mFramesInfo.get(0).getInstant(), mFramesInfo.get(mFramesInfo.size() -1).getInstant());
+            return mFramesInfo.get(mFramesInfo.size() -1).getTimestamp() - mFramesInfo.get(0).getTimestamp();
         }else{
-            return Duration.ZERO;
+            return 0;
         }
     }
 

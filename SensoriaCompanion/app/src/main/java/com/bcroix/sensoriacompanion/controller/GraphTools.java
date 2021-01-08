@@ -8,13 +8,13 @@ import java.util.List;
 
 public class GraphTools {
     static List<Entry> FrameInfoArrayToListEntry(ArrayList<FrameInfo> frameInfoArray){
-        // Recover number of milliseconds of first FrameInfo
-        long minMillis = frameInfoArray.get(0).getInstant().toEpochMilli();
+        // Recover number of nanoseconds of first FrameInfo
+        long minTimestamp = frameInfoArray.get(0).getTimestamp();
         // Fill Array of entries
         List<Entry> entries = new ArrayList<>();
         for (FrameInfo f : frameInfoArray) {
-            // turn your data into Entry objects
-            entries.add(new Entry((float)(f.getInstant().toEpochMilli()-minMillis)/1000, f.getPPGValue()));
+            // turn data into Entry objects
+            entries.add(new Entry((float)(f.getTimestamp()-minTimestamp)/(float)1e9, f.getPPGValue()));
         }
         return entries;
     }

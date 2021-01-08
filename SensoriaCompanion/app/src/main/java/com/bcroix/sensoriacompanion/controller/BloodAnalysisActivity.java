@@ -151,7 +151,7 @@ public class BloodAnalysisActivity extends AppCompatActivity {
                         break;
                     case UI_UPDATE_GRAPH:
                         // Plot Red Mean
-                        LineDataSet dataSet = new LineDataSet(GraphTools.FrameInfoArrayToListEntry(mBloodAnalysisSession.getFramesInfo()), "Red mean");
+                        LineDataSet dataSet = new LineDataSet(GraphTools.FrameInfoArrayToListEntry(mBloodAnalysisSession.getFramesInfo()), "PPG value");
                         dataSet.setColor(Color.RED);
                         dataSet.setValueTextColor(Color.RED);
                         dataSet.setDrawCircles(false);
@@ -208,7 +208,7 @@ public class BloodAnalysisActivity extends AppCompatActivity {
                 mImageAnalysisHandler.sendMessage(msg);
                 // If the analysis is not running yet
                 if(!mAnalysisIsActive){
-                    FrameInfo currentFrameInfo = new FrameInfo(Instant.now());
+                    FrameInfo currentFrameInfo = new FrameInfo();
                     // Enable Analysis Button if the image is valid
                     if(currentFrameInfo.fillInfo(img)){
                         mImageAnalysisHandler.obtainMessage(UI_ENABLE_ANALYSIS_BUTTON).sendToTarget();
@@ -217,7 +217,7 @@ public class BloodAnalysisActivity extends AppCompatActivity {
                     }
                 }else{
                     // The analysis is running :
-                    mBloodAnalysisSession.process(img, now);
+                    mBloodAnalysisSession.process(img);
                     // Update GUI
                     mImageAnalysisHandler.obtainMessage(UI_UPDATE_GRAPH).sendToTarget();
 
@@ -247,12 +247,12 @@ public class BloodAnalysisActivity extends AppCompatActivity {
      * Stores in the app preferences the member BloodAnalysisSession if its duration is long enough
      */
     void saveAnalysisSession(){
-        if(mBloodAnalysisSession.getDuration().compareTo(BloodAnalysisSession.DEFAULT_ANALYSIS_DURATION) >= 0){
+        if(mBloodAnalysisSession.getDuration() >= BloodAnalysisSession.DEFAULT_ANALYSIS_DURATION){
             SharedPreferences  pref = getDefaultSharedPreferences(getApplicationContext());
             SharedPreferences.Editor prefsEditor = pref.edit();
             Gson gson = new Gson();
-            String json = gson.toJson(mBloodAnalysisSession);
-            String key = mBloodAnalysisSession.getFramesInfo().get(0).getInstant().toString();
+            String json = gson.toJson(mBloodAnalysisSession, BloodAnalysisSession.class);
+            String key = Instant.now().toString();
             prefsEditor.putString(key, json);
             prefsEditor.apply();
             // Send message to user
@@ -283,6 +283,9 @@ public class BloodAnalysisActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        saveAnalysisSession();
+        if(mAnalysisIsActive) {
+            // Send message to user
+            Toast.makeText(BloodAnalysisActivity.this, getString(R.string.activity_blood_analysis_save_failure_toast), Toast.LENGTH_SHORT).show();
+        }
     }
 }
