@@ -4,24 +4,33 @@
 package com.bcroix.sensoriacompanion.model;
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.ImageFormat;
+import android.graphics.PixelFormat;
 import android.media.Image;
+import android.provider.MediaStore;
+import android.telephony.ims.ImsManager;
 import android.util.Log;
+import android.renderscript.ScriptIntrinsicYuvToRGB;
+import android.widget.SimpleAdapter;
+
+import androidx.camera.core.internal.utils.ImageUtil;
 
 import java.nio.ByteBuffer;
+import java.time.Instant;
 
 
 public class FrameInfo {
     /**
-     * The instant to which the information is relevant, in nanoseconds from epoch
+     * The instant to which the information is relevant, at which the frame was taken
      */
-    private long mTimestamp;
+    private Instant mInstant;
 
     /**
      * The current camera fps
      */
-    private float mFps;
+    private int mFps;
 
     /**
      * The current camera width
@@ -59,18 +68,19 @@ public class FrameInfo {
     private int mSumRedIntensity;
 
     /**
-     *  Getter for mTimestamp
-     * @return the frame's timestamp
+     * Function to get frame information
+     * @param instant the instant when the frame is sent
      */
-    public long getTimestamp(){
-        return mTimestamp;
+    public FrameInfo(Instant instant){
+        mInstant = instant;
     }
 
     /**
-     *  Getter for mFps
+     *  Getter for mInstant
+     * @return the current frame's instant
      */
-    public float getFps() {
-        return mFps;
+    public Instant getInstant(){
+        return mInstant;
     }
 
     /**
@@ -146,7 +156,7 @@ public class FrameInfo {
      */
     public void setThreshold(Bitmap bitImage)
     {
-        mThreshold = 0.99f*(getMinMaxIntensity(bitImage)[1] - getMinMaxIntensity(bitImage)[0]);
+        //mThreshold = 0.99f*(getMinMaxIntensity(bitImage)[1] - getMinMaxIntensity(bitImage)[0]);
     }
 
     /**
@@ -200,22 +210,19 @@ public class FrameInfo {
     /**
      * Fill all members with relevant information, according to the given image
      * @param image the frame to process
-     * @param lastTimestamp the timestamp of the previous frame to process
      * @return true if the frame is suitable for analysis
      */
-    public boolean fillInfo(Image image, long lastTimestamp){
+    public boolean fillInfo(Image image){
         mRedMean = 0;
         mGreenMean = 0;
         mBlueMean = 0;
         // Get image info and set threshold for valid capture
         mWidth = image.getWidth();
         mHeight = image.getHeight();
-        mTimestamp = image.getTimestamp();
-        mFps = 1e9f/(mTimestamp-lastTimestamp);
         int minExpectedThreshold = 50;
 
         // Convert the image to Bitmap to allow pixel operation
-        Log.d("DEBUG", "image format :" + image.getFormat());
+        // Log.d("DEBUG", "image format :" + image.getFormat());
 
         // Use android import to convert much faster than hand-approach
         // Get YUV channel to buffer
@@ -225,9 +232,9 @@ public class FrameInfo {
 
 
         // Example to print value in the console
-        Log.d("DEBUG", "R pixel : " + mRedMean);
-        Log.d("DEBUG", "G pixel : " + mGreenMean);
-        Log.d("DEBUG", "B pixel : " + mBlueMean);
+        //Log.d("DEBUG", "R pixel : " + mRedMean);
+        //Log.d("DEBUG", "G pixel : " + mGreenMean);
+        //Log.d("DEBUG", "B pixel : " + mBlueMean);
 
 
         // compute threshold of the red channel
@@ -240,7 +247,8 @@ public class FrameInfo {
         }
 
         // compute the sum of the intensities greater than the defined threshold
-        computeSumIntensities(bitImage);
+        //computeSumIntensities(bitImage);
+        //mSumRedIntensity = 58;
 
         return true;
     }
@@ -272,37 +280,32 @@ public class FrameInfo {
     Bitmap yuv420ToBitmap(Image image){
         int pixelStride = image.getPlanes()[1].getRowStride(); // Pixel stride to get to next line
         int uvIndex = 0;          // Corresponding to u and v format index, smaller array
-        boolean loopback = true;  // Variable to get back to the first element to complete 2x2 blocs
+        boolean loopback = false;  // Variable to get back to the first element to complete 2x2 blocs
         // Variable for visibility
-        int R = 0, G = 0, B = 0;
+        int R = 0, G = 0, B = 0, len;
         int yValue, vValue, uValue;
 
         ByteBuffer y = image.getPlanes()[0].getBuffer();
         ByteBuffer u = image.getPlanes()[1].getBuffer();
         ByteBuffer v = image.getPlanes()[2].getBuffer();
 
-
+        len = y.capacity();
         // Int array to be converted to Bitmap
-        int[] argbArray = new int[y.capacity()];
+        int[] argbArray = new int[len];
         // Going through every elements of our array to compute RGB value from YUV
 
-        for(int i = 0; i < y.capacity(); i++){
-            // Increment uvIndex every 2 steps
-            if(i%2 == 1){
-                uvIndex++;
-            }
+        for(int i = 0; i < len; i += 2){
             // Go back to the first element of our table if necessary
-            if(uvIndex == pixelStride){
+            if(uvIndex%(pixelStride) == 0){
                 if (loopback){
-                    uvIndex -= pixelStride - 1;
+                    uvIndex -= (pixelStride);
                     loopback = false;
-                }
-                else {
+                } else {
                     loopback = true;
                 }
             }
 
-            /* YUV is positive, & 0xff result in unsigned value */
+            /*computation of index i */
             yValue = (y.get(i) & 0xff);
             uValue = (u.get(uvIndex) & 0xff);
             vValue = (v.get(uvIndex) & 0xff);
@@ -319,6 +322,22 @@ public class FrameInfo {
 
             // Alpha channel set to 255, 8 bits for every other values
             argbArray[i] = (255 << 24) | (R & 255) << 16 | (G & 255) << 8 | (B & 255);
+
+            /* computation of index i + 1 */
+            yValue = (y.get(i + 1) & 0xff);
+
+            R = (int) clamp(yValue + (1.402 * (vValue-128)), 0, 255);
+            G = (int) clamp(yValue - (0.71414 * (vValue-128)) - (0.34414 * (uValue-128)),0, 255);
+            B = (int) clamp(yValue + (1.772 * (uValue-128)),0,255);
+
+            mRedMean += R;
+            mGreenMean += G;
+            mBlueMean += B;
+
+            // Alpha channel set to 255, 8 bits for every other values
+            argbArray[i+1] = (255 << 24) | (R & 255) << 16 | (G & 255) << 8 | (B & 255);
+
+            uvIndex++;
         }
 
         mRedMean /= (mWidth * mHeight);
@@ -326,5 +345,6 @@ public class FrameInfo {
         mBlueMean /= (mWidth * mHeight);
         return Bitmap.createBitmap(argbArray, mWidth, mHeight, Bitmap.Config.ARGB_8888);
     }
+
 
 }
