@@ -13,7 +13,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.SensoriaCompanion">
-        <activity android:name=".controller.StatisticsActivity"></activity>
+        <activity android:name=".controller.StatisticSession"></activity>
+        <activity android:name=".controller.StatisticsActivity" />
         <activity android:name=".controller.BloodAnalysisActivity" />
         <activity android:name=".controller.MainActivity">
             <intent-filter>
