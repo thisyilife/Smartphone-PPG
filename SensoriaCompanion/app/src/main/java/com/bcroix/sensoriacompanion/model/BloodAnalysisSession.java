@@ -35,10 +35,10 @@ public class BloodAnalysisSession {
      * @param image   the input image
      * @return true if all went well
      */
-    public boolean process(Image image) {
+    public boolean process(Image image, long lastTimestamp) {
         // TODO : maybe complete method
         FrameInfo current = new FrameInfo();
-        boolean res = current.fillInfo(image);
+        boolean res = current.fillInfo(image, lastTimestamp);
         mFramesInfo.add(current);
         return res;
     }

@@ -193,35 +193,40 @@ public class BloodAnalysisActivity extends AppCompatActivity {
                         .build();
         // Define the analysis itself
         imageAnalysis.setAnalyzer(Executors.newSingleThreadExecutor(), new ImageAnalysis.Analyzer() {
+            private long mLastTimestamp = 0;
+
             @SuppressLint("UnsafeExperimentalUsageError")
             @Override
             public void analyze(@NonNull ImageProxy image) {
                 // Recover image
                 Image img = image.getImage();
-                // Recover instant
-                Instant now = Instant.now();
-                // Send fps to main thread
-                Bundle bundle = new Bundle();
-                bundle.putString(UI_UPDATE_FPS_VALUE_KEY, Float.toString(computeFPS(now)));
-                Message msg = mImageAnalysisHandler.obtainMessage(UI_UPDATE_FPS_VALUE);
-                msg.setData(bundle);
-                mImageAnalysisHandler.sendMessage(msg);
+
+                // A bundle to update fps in GUI in main thread
+                Bundle bundleFps = new Bundle();
+
                 // If the analysis is not running yet
                 if(!mAnalysisIsActive){
                     FrameInfo currentFrameInfo = new FrameInfo();
                     // Enable Analysis Button if the image is valid
-                    if(currentFrameInfo.fillInfo(img)){
+                    if(currentFrameInfo.fillInfo(img, mLastTimestamp)){
                         mImageAnalysisHandler.obtainMessage(UI_ENABLE_ANALYSIS_BUTTON).sendToTarget();
                     }else{
                         mImageAnalysisHandler.obtainMessage(UI_DISABLE_ANALYSIS_BUTTON).sendToTarget();
                     }
+                    bundleFps.putString(UI_UPDATE_FPS_VALUE_KEY, Float.toString(currentFrameInfo.getFps()));
                 }else{
                     // The analysis is running :
-                    mBloodAnalysisSession.process(img);
+                    mBloodAnalysisSession.process(img, mLastTimestamp);
                     // Update GUI
                     mImageAnalysisHandler.obtainMessage(UI_UPDATE_GRAPH).sendToTarget();
-
+                    bundleFps.putString(UI_UPDATE_FPS_VALUE_KEY, Float.toString(mBloodAnalysisSession.getFramesInfo().get(mBloodAnalysisSession.getFramesInfo().size()-1).getFps()));
                 }
+                // Save last timestamp
+                mLastTimestamp = img.getTimestamp();
+                // Send message to update fps
+                Message msgFps = mImageAnalysisHandler.obtainMessage(UI_UPDATE_FPS_VALUE);
+                msgFps.setData(bundleFps);
+                mImageAnalysisHandler.sendMessage(msgFps);
 
                 // Close image to allow to take other frames
                 image.close();
@@ -261,23 +266,6 @@ public class BloodAnalysisActivity extends AppCompatActivity {
             // Send message to user
             Toast.makeText(BloodAnalysisActivity.this, getString(R.string.activity_blood_analysis_save_failure_toast), Toast.LENGTH_SHORT).show();
         }
-    }
-
-    /**
-     * The epoch of the last captured frame, only used to compute fps
-     */
-    public static long lastInstantMilli = Instant.now().toEpochMilli();
-
-    /**
-     * Computes the frame rate according to the given instant
-     * @param now the most recent capture instant
-     * @return Frame rate in Hz
-     */
-    float computeFPS(Instant now){
-        long nowMilli = now.toEpochMilli();
-        float res = 1e3f/(nowMilli-lastInstantMilli);
-        lastInstantMilli = nowMilli;
-        return res;
     }
 
     @Override

@@ -21,7 +21,7 @@ public class FrameInfo {
     /**
      * The current camera fps
      */
-    private int mFps;
+    private float mFps;
 
     /**
      * The current camera width
@@ -64,6 +64,13 @@ public class FrameInfo {
      */
     public long getTimestamp(){
         return mTimestamp;
+    }
+
+    /**
+     *  Getter for mFps
+     */
+    public float getFps() {
+        return mFps;
     }
 
     /**
@@ -193,9 +200,10 @@ public class FrameInfo {
     /**
      * Fill all members with relevant information, according to the given image
      * @param image the frame to process
+     * @param lastTimestamp the timestamp of the previous frame to process
      * @return true if the frame is suitable for analysis
      */
-    public boolean fillInfo(Image image){
+    public boolean fillInfo(Image image, long lastTimestamp){
         mRedMean = 0;
         mGreenMean = 0;
         mBlueMean = 0;
@@ -203,6 +211,7 @@ public class FrameInfo {
         mWidth = image.getWidth();
         mHeight = image.getHeight();
         mTimestamp = image.getTimestamp();
+        mFps = 1e9f/(mTimestamp-lastTimestamp);
         int minExpectedThreshold = 50;
 
         // Convert the image to Bitmap to allow pixel operation
