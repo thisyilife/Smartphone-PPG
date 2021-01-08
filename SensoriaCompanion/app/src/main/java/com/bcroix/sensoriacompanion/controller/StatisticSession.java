@@ -95,6 +95,7 @@ public class StatisticSession extends AppCompatActivity {
         //Log.d("DEBUG :", "float value" + String.valueOf(mAnalysisSession.getFramesInfo().get(0).getPPGValue()));
 
         // Enable all options on graph
+        mLineChart.setScaleEnabled(false);
         mLineChart.setTouchEnabled(true);
         mLineChart.setDragEnabled(true);
         mLineChart.setScaleXEnabled(true);
