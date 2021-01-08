@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.bcroix.sensoriacompanion.R;
 import com.bcroix.sensoriacompanion.model.BloodAnalysisSession;
 import com.bcroix.sensoriacompanion.controller.GraphTools;
+import com.bcroix.sensoriacompanion.model.FrameInfo;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
@@ -14,8 +15,11 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,6 +31,7 @@ public class StatisticSession extends AppCompatActivity {
     private TextView mInfoText;
     private int mKeyPosition;
     private List<String> mKeyList;
+    private Button mDeleteButton;
     private SharedPreferences mPreferences;
     //private BloodAnalysisSession mAnalysisSession;
 
@@ -37,6 +42,7 @@ public class StatisticSession extends AppCompatActivity {
 
         mLineChart = findViewById(R.id.activity_statistic_session_graph);
         mLineChart.getDescription().setEnabled(false);
+        mDeleteButton = findViewById(R.id.activity_statistic_session_delete);
 
         //Get previous analysis List
         mPreferences = getDefaultSharedPreferences(getApplicationContext());
@@ -50,6 +56,17 @@ public class StatisticSession extends AppCompatActivity {
         mInfoText = findViewById(R.id.activity_statistic_session_info_txt);
         mInfoText.setText(String.format(getString(R.string.activity_statistic_session_info_txt), mKeyList.get(mKeyPosition)));
 
+        mDeleteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SharedPreferences.Editor editor = mPreferences.edit();
+                editor.remove(mKeyList.get(mKeyPosition));
+                editor.commit();
+
+                finish();
+            }
+        });
+
         plotMemoryAnalysis();
 
     }
@@ -60,6 +77,19 @@ public class StatisticSession extends AppCompatActivity {
         Gson gson = new Gson();
         String json = mPreferences.getString(mKeyList.get(mKeyPosition), "");
         BloodAnalysisSession mAnalysisSession = gson.fromJson(json,BloodAnalysisSession.class);
+        ArrayList<FrameInfo> frameInfoArray = mAnalysisSession.getFramesInfo();
+
+        //Add timestamps to FrameInfo values
+
+        for(int i=0;i<frameInfoArray.size();++i){
+            if(i==0){
+            Instant inst = Instant.EPOCH;
+            frameInfoArray.get(i).setmInstant(inst);
+            } else {
+                frameInfoArray.get(i).setmInstant(Instant.ofEpochMilli(i));
+            }
+
+        }
 
         //Log.d("DEBUG :", "float value" + String.valueOf(mAnalysisSession.getFramesInfo().get(0).getPPGValue()));
 
@@ -70,7 +100,7 @@ public class StatisticSession extends AppCompatActivity {
         mLineChart.setPinchZoom(true);
 
         //Plot BloodAnalysisSession data on the graph
-        LineDataSet dataSet = new LineDataSet(GraphTools.FrameInfoArrayToListEntry(mAnalysisSession.getFramesInfo()), "PPG Value");
+        LineDataSet dataSet = new LineDataSet(GraphTools.FrameInfoArrayToListEntry(frameInfoArray), "PPG Value");
         dataSet.setColor(Color.RED);
         dataSet.setValueTextColor(Color.RED);
         dataSet.setDrawCircles(false);

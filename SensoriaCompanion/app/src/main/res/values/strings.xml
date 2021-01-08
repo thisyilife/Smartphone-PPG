@@ -13,4 +13,5 @@
     <string name="activity_blood_analysis_save_success_toast">Analysis session %s successfully saved !</string>
     <string name="activity_blood_analysis_save_failure_toast">Analysis session aborted</string>
     <string name="activity_statistic_session_info_txt">Analysis Session %s</string>
+    <string name="delete_analysis_txtButton">Delete Analysis</string>
 </resources>

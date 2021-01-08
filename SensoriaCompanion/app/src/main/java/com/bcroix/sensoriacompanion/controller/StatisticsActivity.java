@@ -40,7 +40,17 @@ public class StatisticsActivity extends AppCompatActivity implements AdapterView
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_statistics);
+        statActivitySetUp();
+        checkPermission(Manifest.permission.READ_EXTERNAL_STORAGE, STORAGE_PERMISSION_CODE);
+    }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        statActivitySetUp();
+    }
+
+    private void statActivitySetUp(){
         mViewKeyList = (ListView) findViewById(R.id.mViewKeyList);
         mPreferences = getDefaultSharedPreferences(getApplicationContext());
         mKeyList = new ArrayList<>(mPreferences.getAll().keySet());
@@ -51,7 +61,6 @@ public class StatisticsActivity extends AppCompatActivity implements AdapterView
 
         mViewKeyList.setAdapter(arrayAdapter);
         mViewKeyList.setOnItemClickListener(this);
-        checkPermission(Manifest.permission.READ_EXTERNAL_STORAGE, STORAGE_PERMISSION_CODE);
     }
 
     public void checkPermission(String permission, int requestCode)
