@@ -77,11 +77,12 @@ public class StatisticSession extends AppCompatActivity {
         Gson gson = new Gson();
         String json = mPreferences.getString(mKeyList.get(mKeyPosition), "");
         BloodAnalysisSession mAnalysisSession = gson.fromJson(json,BloodAnalysisSession.class);
-        ArrayList<FrameInfo> frameInfoArray = mAnalysisSession.getFramesInfo();
+
+        //ArrayList<FrameInfo> frameInfoArray = mAnalysisSession.getFramesInfo();
 
         //Add timestamps to FrameInfo values
 
-        for(int i=0;i<frameInfoArray.size();++i){
+        /*for(int i=0;i<frameInfoArray.size();++i){
             if(i==0){
             Instant inst = Instant.EPOCH;
             frameInfoArray.get(i).setmInstant(inst);
@@ -89,7 +90,7 @@ public class StatisticSession extends AppCompatActivity {
                 frameInfoArray.get(i).setmInstant(Instant.ofEpochMilli(i));
             }
 
-        }
+        }*/
 
         //Log.d("DEBUG :", "float value" + String.valueOf(mAnalysisSession.getFramesInfo().get(0).getPPGValue()));
 
@@ -100,7 +101,7 @@ public class StatisticSession extends AppCompatActivity {
         mLineChart.setPinchZoom(true);
 
         //Plot BloodAnalysisSession data on the graph
-        LineDataSet dataSet = new LineDataSet(GraphTools.FrameInfoArrayToListEntry(frameInfoArray), "PPG Value");
+        LineDataSet dataSet = new LineDataSet(GraphTools.FrameInfoArrayToListEntry(mAnalysisSession.getFramesInfo()), "PPG Value");
         dataSet.setColor(Color.RED);
         dataSet.setValueTextColor(Color.RED);
         dataSet.setDrawCircles(false);

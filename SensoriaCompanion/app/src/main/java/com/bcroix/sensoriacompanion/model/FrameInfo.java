@@ -318,6 +318,4 @@ public class FrameInfo {
         return Bitmap.createBitmap(argbArray, mWidth, mHeight, Bitmap.Config.ARGB_8888);
     }
 
-    public void setmInstant(Instant instant){this.mInstant=instant;}
-
 }
