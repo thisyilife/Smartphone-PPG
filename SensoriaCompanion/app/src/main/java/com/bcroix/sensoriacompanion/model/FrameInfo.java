@@ -4,33 +4,24 @@
 package com.bcroix.sensoriacompanion.model;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.ImageFormat;
-import android.graphics.PixelFormat;
 import android.media.Image;
-import android.provider.MediaStore;
-import android.telephony.ims.ImsManager;
 import android.util.Log;
-import android.renderscript.ScriptIntrinsicYuvToRGB;
-import android.widget.SimpleAdapter;
-
-import androidx.camera.core.internal.utils.ImageUtil;
 
 import java.nio.ByteBuffer;
-import java.time.Instant;
 
 
 public class FrameInfo {
     /**
-     * The instant to which the information is relevant, at which the frame was taken
+     * The instant to which the information is relevant, in nanoseconds from epoch
      */
-    private Instant mInstant;
+    private long mTimestamp;
 
     /**
      * The current camera fps
      */
-    private int mFps;
+    private float mFps;
 
     /**
      * The current camera width
@@ -68,19 +59,18 @@ public class FrameInfo {
     private int mSumRedIntensity;
 
     /**
-     * Function to get frame information
-     * @param instant the instant when the frame is sent
+     *  Getter for mTimestamp
+     * @return the frame's timestamp
      */
-    public FrameInfo(Instant instant){
-        mInstant = instant;
+    public long getTimestamp(){
+        return mTimestamp;
     }
 
     /**
-     *  Getter for mInstant
-     * @return the current frame's instant
+     *  Getter for mFps
      */
-    public Instant getInstant(){
-        return mInstant;
+    public float getFps() {
+        return mFps;
     }
 
     /**
@@ -210,19 +200,22 @@ public class FrameInfo {
     /**
      * Fill all members with relevant information, according to the given image
      * @param image the frame to process
+     * @param lastTimestamp the timestamp of the previous frame to process
      * @return true if the frame is suitable for analysis
      */
-    public boolean fillInfo(Image image){
+    public boolean fillInfo(Image image, long lastTimestamp){
         mRedMean = 0;
         mGreenMean = 0;
         mBlueMean = 0;
         // Get image info and set threshold for valid capture
         mWidth = image.getWidth();
         mHeight = image.getHeight();
+        mTimestamp = image.getTimestamp();
+        mFps = 1e9f/(mTimestamp-lastTimestamp);
         int minExpectedThreshold = 50;
 
         // Convert the image to Bitmap to allow pixel operation
-        // Log.d("DEBUG", "image format :" + image.getFormat());
+        Log.d("DEBUG", "image format :" + image.getFormat());
 
         // Use android import to convert much faster than hand-approach
         // Get YUV channel to buffer
@@ -232,9 +225,9 @@ public class FrameInfo {
 
 
         // Example to print value in the console
-        //Log.d("DEBUG", "R pixel : " + mRedMean);
-        //Log.d("DEBUG", "G pixel : " + mGreenMean);
-        //Log.d("DEBUG", "B pixel : " + mBlueMean);
+        Log.d("DEBUG", "R pixel : " + mRedMean);
+        Log.d("DEBUG", "G pixel : " + mGreenMean);
+        Log.d("DEBUG", "B pixel : " + mBlueMean);
 
 
         // compute threshold of the red channel
@@ -247,8 +240,7 @@ public class FrameInfo {
         }
 
         // compute the sum of the intensities greater than the defined threshold
-        //computeSumIntensities(bitImage);
-        //mSumRedIntensity = 58;
+        computeSumIntensities(bitImage);
 
         return true;
     }
@@ -277,7 +269,7 @@ public class FrameInfo {
      * @param image to be converted
      * @return The bitmap from the input image
      */
-    Bitmap yuv420ToBitmap(Image image){
+     Bitmap yuv420ToBitmap(Image image){
         int pixelStride = image.getPlanes()[1].getRowStride(); // Pixel stride to get to next line
         int uvIndex = 0;          // Corresponding to u and v format index, smaller array
         boolean loopback = false;  // Variable to get back to the first element to complete 2x2 blocs
@@ -345,6 +337,5 @@ public class FrameInfo {
         mBlueMean /= (mWidth * mHeight);
         return Bitmap.createBitmap(argbArray, mWidth, mHeight, Bitmap.Config.ARGB_8888);
     }
-
 
 }
