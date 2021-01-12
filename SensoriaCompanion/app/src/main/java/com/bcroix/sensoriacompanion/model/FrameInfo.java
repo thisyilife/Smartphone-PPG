@@ -122,23 +122,27 @@ public class FrameInfo {
      * @return the min and max intensity of the red channel in an array
      */
     public int[] getMinMaxIntensity(Bitmap bitImage){
-        int pixel = 0;
+        int[] pixels = new int[mWidth * mHeight];
+        bitImage.getPixels(pixels, 0, mWidth,0,0, mWidth, mHeight);
+        int redPixel;
         int maxRedIntensity=0;
         int minRedIntensity=255;
         int[] minMaxRedIntensity = new int[2];
-        for(int y = 0; y < mHeight; y++){
-            for(int x = 0; x < mWidth; x++){
-                pixel = bitImage.getPixel(x,y);
-                if(Color.red(pixel) >maxRedIntensity)
-                    maxRedIntensity = Color.red(pixel);
-                if(Color.red(pixel) <minRedIntensity)
-                    minRedIntensity = Color.red(pixel);
-            }
+
+        for(int i : pixels){
+            redPixel = Color.red(i);
+            if(redPixel > maxRedIntensity)
+                maxRedIntensity = redPixel;
+            if(redPixel < minRedIntensity)
+                minRedIntensity = redPixel;
         }
+
         minMaxRedIntensity[0]=minRedIntensity;
         minMaxRedIntensity[1]=maxRedIntensity;
         return minMaxRedIntensity;
     }
+
+
     /**
      * Fill all members with relevant information, according to the given image
      * @param bitImage of the frame
@@ -146,7 +150,7 @@ public class FrameInfo {
      */
     public void setThreshold(Bitmap bitImage)
     {
-        //mThreshold = 0.99f*(getMinMaxIntensity(bitImage)[1] - getMinMaxIntensity(bitImage)[0]);
+        mThreshold = 0.99f*(getMinMaxIntensity(bitImage)[1] - getMinMaxIntensity(bitImage)[0]);
     }
 
     /**
@@ -158,43 +162,21 @@ public class FrameInfo {
         return mSumRedIntensity;
     }
 
-    public void computeSumIntensities(Bitmap bitImage)
-    {
-        mSumRedIntensity=0;
-        int pixel =0;
-        for(int y = 0; y < mHeight; y++){
-            for(int x = 0; x < mWidth; x++){
-                pixel = bitImage.getPixel(x,y);
-                if (Color.red(pixel) >= mThreshold)
-                    mSumRedIntensity += Color.red(pixel);
-            }
-        }
-    }
-
     /**
-     * Function to compute the mean of every pixel
-     * @param bitImage, image captured by the camera
+     * Compute red pixels above threshold
+     * @param bitImage, the input bitmap format image
      */
-    public void computeFrameMean(Bitmap bitImage){
-        int pixel = 0;
-        mRedMean = 0;
-        mGreenMean = 0;
-        mBlueMean = 0;
-        // Get R,G,B pixel value
-        for(int y = 0; y < mHeight; y++){
-            for(int x = 0; x < mWidth; x++){
-                pixel = bitImage.getPixel(x,y);
-                mRedMean += Color.red(pixel);
-                mGreenMean += Color.green(pixel);
-                mBlueMean += Color.blue(pixel);
-            }
-        }
-        // Divide every value by the size of the frame to get the mean
-        mRedMean /= (mWidth * mHeight);
-        mGreenMean /= (mWidth * mHeight);
-        mBlueMean /= (mWidth * mHeight);
-    }
+    public void computeSumIntensities(Bitmap bitImage){
+        mSumRedIntensity = 0;
 
+        int[] pixels = new int[mWidth * mHeight];
+        bitImage.getPixels(pixels, 0, mWidth,0,0, mWidth, mHeight);
+
+        for(int i : pixels){
+            if(Color.red(i) >= mThreshold)
+                mSumRedIntensity += Color.red(i);
+        }
+    }
 
 
     /**
@@ -215,20 +197,17 @@ public class FrameInfo {
         int minExpectedThreshold = 50;
 
         // Convert the image to Bitmap to allow pixel operation
-        Log.d("DEBUG", "image format :" + image.getFormat());
 
         // Use android import to convert much faster than hand-approach
         // Get YUV channel to buffer
         Bitmap bitImage = convertYUVToBitmap(image);
 
-        //computeFrameMean(bitImage);
-
-
         // Example to print value in the console
+        /*
         Log.d("DEBUG", "R pixel : " + mRedMean);
         Log.d("DEBUG", "G pixel : " + mGreenMean);
         Log.d("DEBUG", "B pixel : " + mBlueMean);
-
+        */
 
         // compute threshold of the red channel
         setThreshold(bitImage);
@@ -331,10 +310,11 @@ public class FrameInfo {
 
             uvIndex++;
         }
-
+        /*
         mRedMean /= (mWidth * mHeight);
         mGreenMean /= (mWidth * mHeight);
         mBlueMean /= (mWidth * mHeight);
+        */
         return Bitmap.createBitmap(argbArray, mWidth, mHeight, Bitmap.Config.ARGB_8888);
     }
 
