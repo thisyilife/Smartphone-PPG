@@ -84,4 +84,23 @@ public class BloodAnalysisSession {
         // TODO : put relevant code, following one is a dummy
         return new Random().nextInt(120 + 1);
     }
+
+    /**
+     * Returns PPG value of FrameInfo at given index, filtered using previous frame infos
+     * @param index the index of the frameInfo to process
+     * @return the PPG value
+     */
+    public float getPPGFiltered(int index){
+        // The PPG value is the average of the nb_frame last values
+        final int nb_frames = 8;
+
+        if(index < 0) return -1;
+        // Make sure a good number of frames can be used
+        int used_nb_frames = (index - nb_frames + 1 < 0)? index+1 : nb_frames;
+        float result = 0;
+        for(int i = 0; i<used_nb_frames; i++){
+            result += mFramesInfo.get(index).getPPGValue();
+        }
+        return result / used_nb_frames;
+    }
 }

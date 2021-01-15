@@ -151,7 +151,8 @@ public class BloodAnalysisActivity extends AppCompatActivity {
                         break;
                     case UI_UPDATE_GRAPH:
                         // Plot Red Mean
-                        LineDataSet dataSet = new LineDataSet(GraphTools.FrameInfoArrayToListEntry(mBloodAnalysisSession.getFramesInfo()), "PPG value");
+                        //LineDataSet dataSet = new LineDataSet(GraphTools.FrameInfoArrayToListEntry(mBloodAnalysisSession.getFramesInfo()), "PPG value");
+                        LineDataSet dataSet = new LineDataSet(GraphTools.BloodAnalysisSessionToListEntry(mBloodAnalysisSession), "PPG value");
                         dataSet.setColor(Color.RED);
                         dataSet.setValueTextColor(Color.RED);
                         dataSet.setDrawCircles(false);

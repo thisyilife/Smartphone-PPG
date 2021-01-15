@@ -102,7 +102,7 @@ public class StatisticSession extends AppCompatActivity {
         mLineChart.setPinchZoom(true);
 
         //Plot BloodAnalysisSession data on the graph
-        LineDataSet dataSet = new LineDataSet(GraphTools.FrameInfoArrayToListEntry(mAnalysisSession.getFramesInfo()), "PPG Value");
+        LineDataSet dataSet = new LineDataSet(GraphTools.BloodAnalysisSessionToListEntry(mAnalysisSession), "PPG Value");
         dataSet.setColor(Color.RED);
         dataSet.setValueTextColor(Color.RED);
         dataSet.setDrawCircles(false);
