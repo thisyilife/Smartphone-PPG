@@ -101,12 +101,9 @@ public class StatisticSession extends AppCompatActivity {
         mLineChart.setScaleXEnabled(true);
         mLineChart.setPinchZoom(true);
 
-        //Plot BloodAnalysisSession data on the graph
-        LineDataSet dataSet = new LineDataSet(GraphTools.BloodAnalysisSessionToListEntry(mAnalysisSession), "PPG Value");
-        dataSet.setColor(Color.RED);
-        dataSet.setValueTextColor(Color.RED);
-        dataSet.setDrawCircles(false);
-        mLineChart.setData(new LineData(dataSet));
+        // Convert blood analysis session to plots
+        mLineChart.setData(GraphTools.BloodAnalysisSessionToLineData(mAnalysisSession));
+        // Refresh
         mLineChart.invalidate();
     }
 }

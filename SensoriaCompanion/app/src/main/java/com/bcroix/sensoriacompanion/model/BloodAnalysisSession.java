@@ -122,14 +122,15 @@ public class BloodAnalysisSession {
         float previous = getPPGAvg(index-2);
         float current = getPPGAvg(index-1);
         float next = getPPGAvg(index);
-        boolean is_local_min = previous < current && current < next;
+        boolean is_local_min = previous > current && current < next;
         if(is_local_min){
             // Compute number of frames needed to average last LOOK_FOR_HEARTBEAT_DURATION
             int nb_frames_for_avg = 0;
             float duration = 0;
-            while(duration < 1e-9f * LOOK_FOR_HEARTBEAT_DURATION && nb_frames_for_avg < mFramesInfo.size()-1){
-                duration += 1.0f / mFramesInfo.get(index-1-nb_frames_for_avg).getFps();
+            while(duration < LOOK_FOR_HEARTBEAT_DURATION){
+                duration += mFramesInfo.get(index-1-nb_frames_for_avg).getTimestamp();
                 nb_frames_for_avg++;
+                if(index-1-nb_frames_for_avg == 0) break;
             }
             // Return true if the value is less than the average of the last nb_frames_for_avg
             return current < getPPGAvg(index, nb_frames_for_avg);
