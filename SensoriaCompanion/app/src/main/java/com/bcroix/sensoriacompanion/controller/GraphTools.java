@@ -27,7 +27,7 @@ public class GraphTools {
         List<Entry> entries = new ArrayList<>();
         for (int i = 0; i<b.getFramesInfo().size(); i++) {
             // turn data into Entry objects
-            entries.add(new Entry((float)(b.getFramesInfo().get(i).getTimestamp()-minTimestamp)/(float)1e9, b.getPPGFiltered(i)));
+            entries.add(new Entry((float)(b.getFramesInfo().get(i).getTimestamp()-minTimestamp)/(float)1e9, b.getPPGAvg(i)));
         }
         return entries;
     }

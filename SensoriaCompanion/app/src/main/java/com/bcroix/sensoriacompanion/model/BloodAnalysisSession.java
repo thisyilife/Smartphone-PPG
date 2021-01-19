@@ -11,9 +11,19 @@ import java.util.Random;
 public class BloodAnalysisSession {
 
     /**
-     * The Default duration required to perform an analysis
+     * The Default duration required to perform an analysis in nanoseconds
      */
     public static final long DEFAULT_ANALYSIS_DURATION = (long)15e9;
+
+    /**
+     * The duration used to know if a frame is a heartbeat or not in ns
+     */
+    public static final long LOOK_FOR_HEARTBEAT_DURATION = (long)2e9;
+
+    /**
+     * The number of frames on which the PPG signal will be averaged by default
+     */
+    public static final int NB_FRAMES_FOR_AVG_PPG = 8;
 
     /**
      * Ordered collection of all frameInfo since the beginning of the session
@@ -86,14 +96,11 @@ public class BloodAnalysisSession {
     }
 
     /**
-     * Returns PPG value of FrameInfo at given index, filtered using previous frame infos
+     * Returns PPG value of FrameInfo at given index, averaged using previous frame infos
      * @param index the index of the frameInfo to process
      * @return the PPG value
      */
-    public float getPPGFiltered(int index){
-        // The PPG value is the average of the nb_frame last values
-        final int nb_frames = 8;
-
+    public float getPPGAvg(int index, int nb_frames){
         if(index < 0) return -1;
         // Make sure a good number of frames can be used
         int used_nb_frames = (index - nb_frames + 1 < 0)? index+1 : nb_frames;
@@ -102,5 +109,31 @@ public class BloodAnalysisSession {
             result += mFramesInfo.get(index).getPPGValue();
         }
         return result / used_nb_frames;
+    }
+
+    public float getPPGAvg(int index){
+        return getPPGAvg(index, BloodAnalysisSession.NB_FRAMES_FOR_AVG_PPG);
+    }
+
+    public boolean isHeartbeat(int index){
+        // A heartbeat is a local minimum whose value is less than the average of the last 2-3 seconds frames
+        if(index < 2) return false;
+        // Look at the previous index because it needs following value
+        float previous = getPPGAvg(index-2);
+        float current = getPPGAvg(index-1);
+        float next = getPPGAvg(index);
+        boolean is_local_min = previous < current && current < next;
+        if(is_local_min){
+            // Compute number of frames needed to average last LOOK_FOR_HEARTBEAT_DURATION
+            int nb_frames_for_avg = 0;
+            float duration = 0;
+            while(duration < 1e-9f * LOOK_FOR_HEARTBEAT_DURATION && nb_frames_for_avg < mFramesInfo.size()-1){
+                duration += 1.0f / mFramesInfo.get(index-1-nb_frames_for_avg).getFps();
+                nb_frames_for_avg++;
+            }
+            // Return true if the value is less than the average of the last nb_frames_for_avg
+            return current < getPPGAvg(index, nb_frames_for_avg);
+        }
+        return false;
     }
 }
