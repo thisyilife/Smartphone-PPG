@@ -15,4 +15,15 @@
     <string name="activity_blood_analysis_save_failure_toast">Analysis session aborted</string>
     <string name="activity_statistic_session_info_txt">Analysis Session %s</string>
     <string name="delete_analysis_txtButton">Delete Analysis</string>
+    <string name="title_activity_tutorial">TutorialActivity</string>
+    <!--
+    This string is used for square devices and overridden by hello_world in
+    values-round/strings.xml for round devices.
+    -->
+    <string name="hello_world">Hello Square World!</string>
+    <string name="lbltitle">Sensoria Analytics</string>
+    <string name="user_scheme">user_scheme</string>
+    <string name="activity_tutorial_titletxt">Sensoria Analytics</string>
+    <string name="activity_go_totutorial_analysis_btn">Go to analysis menu</string>
+    <string name="activity_tutorial_explanation_text">Once in the analysis menu, make sure to put your finger on you camera as shown in the picutre below. Then, click Start Analysisand try not to move your finger for 20 seconds.</string>
 </resources>
