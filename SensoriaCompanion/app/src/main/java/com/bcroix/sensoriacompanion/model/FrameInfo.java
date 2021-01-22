@@ -177,9 +177,6 @@ public class FrameInfo {
         mFps = 1e9f/(mTimestamp-lastTimestamp);
 
         // Convert the image to Bitmap to allow pixel operation
-
-        // Use android import to convert much faster than hand-approach
-        // Get YUV channel to buffer
         Bitmap bitImage = convertYUVToBitmap(image);
 
         // compute threshold of the red channel
@@ -224,7 +221,7 @@ public class FrameInfo {
      Bitmap yuv420ToBitmap(Image image){
         int pixelStride = image.getPlanes()[1].getRowStride(); // Pixel stride to get to next line
         int uvIndex = 0;          // Corresponding to u and v format index, smaller array
-        boolean loopback = false;  // Variable to get back to the first element to complete 2x2 blocs
+        boolean loopback = false; // Variable to get back to the first element to complete 2x2 blocs
         // Variable for visibility
         int R = 0, G = 0, B = 0, len;
         int yValue, vValue, uValue;

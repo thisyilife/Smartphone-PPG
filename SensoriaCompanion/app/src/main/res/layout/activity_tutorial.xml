@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/linearLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".controller.MainActivity">
+
+    <TextView
+        android:id="@+id/activity_tutorial_title_text"
+        android:layout_width="204dp"
+        android:layout_height="34dp"
+        android:text="@string/activity_tutorial_titletxt"
+        android:textSize="24sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.022" />
+
+    <ImageView
+        android:id="@+id/activity_tutorial_user_scheme"
+        android:layout_width="171dp"
+        android:layout_height="324dp"
+        android:layout_marginStart="120dp"
+        android:contentDescription="@string/user_scheme"
+        android:src="@drawable/user_scheme"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.584" />
+
+    <TextView
+        android:id="@+id/activity_tutorial_explanations"
+        android:layout_width="305dp"
+        android:layout_height="75dp"
+        android:text="@string/activity_tutorial_explanation_text"
+        app:layout_constraintBottom_toTopOf="@+id/activity_tutorial_user_scheme"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activity_tutorial_title_text"
+        app:layout_constraintVertical_bias="0.367" />
+
+    <Button
+        android:id="@+id/activity_tutorial_go_to_analysis_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/activity_go_totutorial_analysis_btn"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activity_tutorial_user_scheme"
+        app:layout_constraintVertical_bias="0.504" />
+</androidx.constraintlayout.widget.ConstraintLayout>

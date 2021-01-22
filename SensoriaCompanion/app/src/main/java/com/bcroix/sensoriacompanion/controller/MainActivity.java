@@ -19,6 +19,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView mWelcomeMsg;
     private Button mBloodAnalysisMenuButton;
     private Button mStatisticsMenuButton;
+    private Button mTutorialMenuButton;
 
     // Model members
 
@@ -32,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
         mWelcomeMsg = findViewById(R.id.activity_main_welcome_msg);
         mBloodAnalysisMenuButton = findViewById(R.id.activity_main_blood_analysis_menu_button);
         mStatisticsMenuButton = findViewById(R.id.activity_main_statistics_menu_button);
+        mTutorialMenuButton = findViewById(R.id.activity_main_tutorial_menu_button);
 
         // Add button listeners
         mBloodAnalysisMenuButton.setOnClickListener(new View.OnClickListener() {
@@ -45,6 +47,12 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(MainActivity.this, StatisticsActivity.class));
+            }
+        });
+        mTutorialMenuButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this, TutorialActivity.class));
             }
         });
     }
