@@ -197,23 +197,12 @@ public class FrameInfo {
         int minExpectedThreshold = 50;
 
         // Convert the image to Bitmap to allow pixel operation
-
-        // Use android import to convert much faster than hand-approach
-        // Get YUV channel to buffer
         Bitmap bitImage = convertYUVToBitmap(image);
-
-        // Example to print value in the console
-        /*
-        Log.d("DEBUG", "R pixel : " + mRedMean);
-        Log.d("DEBUG", "G pixel : " + mGreenMean);
-        Log.d("DEBUG", "B pixel : " + mBlueMean);
-        */
 
         // compute threshold of the red channel
         setThreshold(bitImage);
 
         // if its greater than min expected threshold then its a valid capture
-
         if(mThreshold < minExpectedThreshold){
             //return false;
         }
@@ -251,7 +240,7 @@ public class FrameInfo {
      Bitmap yuv420ToBitmap(Image image){
         int pixelStride = image.getPlanes()[1].getRowStride(); // Pixel stride to get to next line
         int uvIndex = 0;          // Corresponding to u and v format index, smaller array
-        boolean loopback = false;  // Variable to get back to the first element to complete 2x2 blocs
+        boolean loopback = false; // Variable to get back to the first element to complete 2x2 blocs
         // Variable for visibility
         int R = 0, G = 0, B = 0, len;
         int yValue, vValue, uValue;
@@ -310,11 +299,6 @@ public class FrameInfo {
 
             uvIndex++;
         }
-        /*
-        mRedMean /= (mWidth * mHeight);
-        mGreenMean /= (mWidth * mHeight);
-        mBlueMean /= (mWidth * mHeight);
-        */
         return Bitmap.createBitmap(argbArray, mWidth, mHeight, Bitmap.Config.ARGB_8888);
     }
 

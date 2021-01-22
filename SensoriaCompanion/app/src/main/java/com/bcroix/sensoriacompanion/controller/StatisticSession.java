@@ -78,20 +78,6 @@ public class StatisticSession extends AppCompatActivity {
         String json = mPreferences.getString(mKeyList.get(mKeyPosition), "");
         BloodAnalysisSession mAnalysisSession = gson.fromJson(json,BloodAnalysisSession.class);
 
-        //ArrayList<FrameInfo> frameInfoArray = mAnalysisSession.getFramesInfo();
-
-        //Add timestamps to FrameInfo values
-
-        /*for(int i=0;i<frameInfoArray.size();++i){
-            if(i==0){
-            Instant inst = Instant.EPOCH;
-            frameInfoArray.get(i).setmInstant(inst);
-            } else {
-                frameInfoArray.get(i).setmInstant(Instant.ofEpochMilli(i));
-            }
-
-        }*/
-
         //Log.d("DEBUG :", "float value" + String.valueOf(mAnalysisSession.getFramesInfo().get(0).getPPGValue()));
 
         // Enable all options on graph
