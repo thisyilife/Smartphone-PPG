@@ -21,6 +21,11 @@ public class BloodAnalysisSession {
     public static final long LOOK_FOR_HEARTBEAT_DURATION = (long)2e9;
 
     /**
+     * The number of heart beats used to compute heart pulse value.
+     */
+    public static final long HEARTBEAT_NUMBER_FOR_PULSE = 10;
+
+    /**
      * Ordered collection of all frameInfo since the beginning of the session.
      */
     ArrayList<FrameInfo> mFramesInfo;
@@ -64,8 +69,19 @@ public class BloodAnalysisSession {
      * @return heartbeat value in beats per minute.
      */
     public double getHeartbeatAt(int index) {
-        // TODO : put relevant code, following one is a dummy
-        return new Random().nextInt(120 + 1);
+        // Search for a certain amount of heartbeats in previous indices
+        int nb_heartbeats = 0;
+        int index_to_look = index + 1;
+        while(nb_heartbeats < BloodAnalysisSession.HEARTBEAT_NUMBER_FOR_PULSE && index_to_look > 0){
+            index_to_look -= 1;
+            if(isHeartbeat(index_to_look)) nb_heartbeats += 1;
+        }
+        // Compute total amount of time (in ns) between index_to_look and index
+        long duration = mFramesInfo.get(index).getTimestamp() - mFramesInfo.get(index_to_look).getTimestamp();
+        // Compute average duration of a heartbeat (in ns)
+        double hb_duration = (double)duration / BloodAnalysisSession.HEARTBEAT_NUMBER_FOR_PULSE;
+        // Convert to bpm
+        return 60e9d / hb_duration;
     }
 
     /**
