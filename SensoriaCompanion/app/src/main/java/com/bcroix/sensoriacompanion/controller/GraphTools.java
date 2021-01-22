@@ -29,20 +29,26 @@ public class GraphTools {
         // Each dataset is a line to plot
         List<ILineDataSet> dataSets = new ArrayList<>();
 
+        /* Compute values of each line to plot ****************************************************/
+
+        List<Entry> ppg_entries = new ArrayList<>();
+        List<Entry> hb_entries = new ArrayList<>();
+
         // Recover number of nanoseconds of first FrameInfo
         long minTimestamp = b.getFramesInfo().get(0).getTimestamp();
         // Fill Array of entries
-        List<Entry> ppg_entries = new ArrayList<>();
-        List<Entry> hb_entries = new ArrayList<>();
         for (int i = 0; i<b.getFramesInfo().size(); i++) {
             // turn data into Entry objects
             float time = (float)(b.getFramesInfo().get(i).getTimestamp()-minTimestamp)/1e9f;
-            float ppg_value = b.getPPGAvg(i);
+            float ppg_value = b.getFramesInfo().get(i).getPPGValue();
+            // For PPG plot
             ppg_entries.add(new Entry(time, ppg_value));
+            // For heartbeat plot
             hb_entries.add(new Entry(time, b.isHeartbeat(i)? ppg_value : 0));
         }
 
-        // Set characteristics of each plot
+        /* Set characteristics of each plot *******************************************************/
+
         LineDataSet ppg_line = new LineDataSet(ppg_entries, "PPG value");
         ppg_line.setColor(Color.RED);
         ppg_line.setValueTextColor(Color.RED);
