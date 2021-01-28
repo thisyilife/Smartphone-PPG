@@ -25,5 +25,5 @@
     <string name="user_scheme">user_scheme</string>
     <string name="activity_tutorial_titletxt">Sensoria Analytics</string>
     <string name="activity_go_totutorial_analysis_btn">Go to analysis menu</string>
-    <string name="activity_tutorial_explanation_text">Once in the analysis menu, make sure to put your finger on you camera as shown in the picutre below. Then, click Start Analysisand try not to move your finger for 20 seconds.</string>
+    <string name="activity_tutorial_explanation_text">Once in the analysis menu, make sure to put your finger on you camera as shown in the picture below. Then, click on "Start Analysis" and try not to move your finger for about 20 seconds.</string>
 </resources>
