@@ -144,7 +144,7 @@ public class FrameInfo {
 
 
     /**
-     * Fill all members with relevant information, according to the given image
+     * Compute the threshold to get a valid capture
      * @param bitImage of the frame
      * @return the threshold of the intensity of the red channel
      */
@@ -178,7 +178,6 @@ public class FrameInfo {
         }
     }
 
-
     /**
      * Fill all members with relevant information, according to the given image
      * @param image the frame to process
@@ -199,7 +198,7 @@ public class FrameInfo {
         // Convert the image to Bitmap to allow pixel operation
         Bitmap bitImage = convertYUVToBitmap(image);
 
-        // compute threshold of the red channel
+        // compute mThreshold of the red channel
         setThreshold(bitImage);
 
         // if its greater than min expected threshold then its a valid capture
@@ -242,7 +241,7 @@ public class FrameInfo {
         int uvIndex = 0;          // Corresponding to u and v format index, smaller array
         boolean loopback = false; // Variable to get back to the first element to complete 2x2 blocs
         // Variable for visibility
-        int R = 0, G = 0, B = 0, len;
+        int R, G, B, len;
         int yValue, vValue, uValue;
 
         ByteBuffer y = image.getPlanes()[0].getBuffer();
