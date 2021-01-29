@@ -79,7 +79,7 @@ class BloodAnalysisSession{
 + getPPGFiltered(index : int) : double
 }
 BloodAnalysisSession *-- "0..*" FrameInfo : "mFrameInfo"
-BloodAnalysisActivity *-- "1" BloodAnalysisSession : mBloodAnalysisSession
+BloodAnalysisActivity *-up- "1" BloodAnalysisSession : mBloodAnalysisSession
 
 class FrameInfo{
 - mTimestamp : long
@@ -109,4 +109,3 @@ class FrameInfo{
 }
 }
 @enduml
-
