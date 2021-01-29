@@ -14,93 +14,78 @@ import java.nio.ByteBuffer;
 
 public class FrameInfo {
     /**
-     * The instant to which the information is relevant, in nanoseconds from epoch
+     * The instant to which the information is relevant, in nanoseconds.
+     * Each timestamp is only coherent with the ones taken during an analysis.
      */
     private long mTimestamp;
 
     /**
-     * The current camera fps
+     * The frame rate for this image.
      */
     private float mFps;
 
     /**
-     * The current camera width
+     * The width of the camera.
      */
     private int mWidth;
 
     /**
-     * The current camera height
+     * The height of the camera.
      */
     private int mHeight;
 
     /**
-     * The mean of the frame's red channel
+     * The mean of the frame's red channel.
      */
     private int mRedMean;
 
     /**
-     * The mean of the frame's red channel
+     * The mean of the frame's green channel.
      */
     private int mGreenMean;
 
     /**
-     * The mean of the frame's red channel
+     * The mean of the frame's blue channel.
      */
     private int mBlueMean;
 
     /**
-     * The threshold of the frame's red channel
+     * The threshold used to compute the PPG value of this frame.
      */
     private float mThreshold;
 
     /**
-     * sum of pixels with intensity greater than the computed threshold
+     * Minimum expected threshold of any frame.
+     * Not set to an accurate value yet.
+     */
+    static final int minExpectedThreshold = 0;
+
+    /**
+     * sum of pixels with intensity greater than the computed threshold.
      */
     private int mSumRedIntensity;
 
-    /**
-     *  Getter for mTimestamp
-     * @return the frame's timestamp
-     */
+    /*********** Getters **********/
     public long getTimestamp(){
         return mTimestamp;
     }
 
-    /**
-     *  Getter for mFps
-     */
     public float getFps() {
         return mFps;
     }
 
-    /**
-     *  Getter for mSumRedIntensity
-     * @return the current frame's sum red intensity
-     */
     public int getSumRedIntensity(){
         return mSumRedIntensity;
     }
 
-    /**
-     * Getter for mRedMean
-     * @return the red level of a frame
-     */
     public int getRedMean(){
         return mRedMean;
     }
 
-    /**
-     * Getter for mRedMean
-     * @return the red level of a frame
-     */
     public int getBlueMean(){
         return mBlueMean;
     }
 
-    /**
-     * Getter for mRedMean
-     * @return the red level of a frame
-     */
     public int getGreenMean(){
         return mGreenMean;
     }
@@ -116,10 +101,9 @@ public class FrameInfo {
         return Math.max(min, Math.min(max,val));
     }
 
-
     /**
-     * Getter for the red channel intensity
-     * @return the min and max intensity of the red channel in an array
+     * Computes the red channel bounds.
+     * @return the min and max intensity of the red channel in an array of size 2.
      */
     public int[] getMinMaxIntensity(Bitmap bitImage){
         int[] pixels = new int[mWidth * mHeight];
@@ -142,11 +126,9 @@ public class FrameInfo {
         return minMaxRedIntensity;
     }
 
-
     /**
-     * Compute the threshold to get a valid capture
-     * @param bitImage of the frame
-     * @return the threshold of the intensity of the red channel
+     * Sets mThreshold according to given Bitmap image.
+     * @param bitImage the frame used to compute threshold.
      */
     public void setThreshold(Bitmap bitImage)
     {
@@ -154,8 +136,8 @@ public class FrameInfo {
     }
 
     /**
-     * Return PPG value, used to compute heartbeat
-     * @return PPG value
+     * Return PPG value, used to compute heartbeat.
+     * @return PPG value.
      */
     public float getPPGValue()
     {
@@ -163,8 +145,8 @@ public class FrameInfo {
     }
 
     /**
-     * Compute red pixels above threshold
-     * @param bitImage, the input bitmap format image
+     * Compute sum of red pixels above mThreshold.
+     * @param bitImage the bitmap image used for computation.
      */
     public void computeSumIntensities(Bitmap bitImage){
         mSumRedIntensity = 0;
@@ -179,10 +161,10 @@ public class FrameInfo {
     }
 
     /**
-     * Fill all members with relevant information, according to the given image
-     * @param image the frame to process
-     * @param lastTimestamp the timestamp of the previous frame to process
-     * @return true if the frame is suitable for analysis
+     * Fill all members with relevant information, according to the given image.
+     * @param image the frame to process, directly from camera.
+     * @param lastTimestamp the timestamp of the previous processed frame.
+     * @return true if the frame is suitable for analysis.
      */
     public boolean fillInfo(Image image, long lastTimestamp){
         mRedMean = 0;
@@ -193,7 +175,6 @@ public class FrameInfo {
         mHeight = image.getHeight();
         mTimestamp = image.getTimestamp();
         mFps = 1e9f/(mTimestamp-lastTimestamp);
-        int minExpectedThreshold = 50;
 
         // Convert the image to Bitmap to allow pixel operation
         Bitmap bitImage = convertYUVToBitmap(image);
@@ -201,9 +182,10 @@ public class FrameInfo {
         // compute mThreshold of the red channel
         setThreshold(bitImage);
 
-        // if its greater than min expected threshold then its a valid capture
-        if(mThreshold < minExpectedThreshold){
-            //return false;
+        // if its greater than min expected threshold then it is a valid capture
+        if(mThreshold < FrameInfo.minExpectedThreshold){
+            // Not implemented yet since minExpectedThreshold is not known
+            return false;
         }
 
         // compute the sum of the intensities greater than the defined threshold
@@ -213,9 +195,9 @@ public class FrameInfo {
     }
 
     /**
-     * Convert image into bitmap following format and fill mRed, mBlue, mGreen
-     * @param image input to be converted
-     * @return bitimage, the converted bitmap image
+     * Convert image into bitmap following format and fill members mRed, mBlue, mGreen.
+     * @param image input to be converted.
+     * @return the converted bitmap image.
      */
     public Bitmap convertYUVToBitmap(Image image) {
         // retrieve the number of ByteBuffers needed to represent the image
@@ -232,9 +214,9 @@ public class FrameInfo {
     }
 
     /**
-     * Convert a yuv_420_888 image type to Bitmap type
-     * @param image to be converted
-     * @return The bitmap from the input image
+     * Convert a yuv_420_888 image type to Bitmap type.
+     * @param image to be converted.
+     * @return The bitmap from the input image.
      */
      Bitmap yuv420ToBitmap(Image image){
         int pixelStride = image.getPlanes()[1].getRowStride(); // Pixel stride to get to next line

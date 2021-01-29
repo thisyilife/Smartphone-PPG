@@ -8,8 +8,8 @@
 
     <string name="activity_blood_analysis_start_button">Start analysis</string>
     <string name="activity_blood_analysis_stop_button">Stop analysis</string>
-    <string name="activity_blood_analysis_param_txt">Image analysis running at %f fps</string>
-    <string name="activity_blood_analysis_info_txt">Your heartbeat is currently %1$d beats per minute</string>
+    <string name="activity_blood_analysis_param_txt">Image analysis running at %.1f fps</string>
+    <string name="activity_blood_analysis_info_txt">Your heartbeat is currently %.1f beats per minute</string>
     <string name="activity_blood_analysis_no_data_graph_txt">Please start an analysis in order to plot graphs</string>
     <string name="activity_blood_analysis_save_success_toast">Analysis session %s successfully saved !</string>
     <string name="activity_blood_analysis_save_failure_toast">Analysis session aborted</string>
@@ -25,5 +25,5 @@
     <string name="user_scheme">user_scheme</string>
     <string name="activity_tutorial_titletxt">Sensoria Analytics</string>
     <string name="activity_go_totutorial_analysis_btn">Go to analysis menu</string>
-    <string name="activity_tutorial_explanation_text">Once in the analysis menu, make sure to put your finger on you camera as shown in the picutre below. Then, click Start Analysisand try not to move your finger for 20 seconds.</string>
+    <string name="activity_tutorial_explanation_text">Once in the analysis menu, make sure to put your finger on you camera as shown in the picture below. Then, click on "Start Analysis" and try not to move your finger for about 20 seconds.</string>
 </resources>

@@ -62,8 +62,9 @@ public class BloodAnalysisActivity extends AppCompatActivity {
     static final int UI_ENABLE_ANALYSIS_BUTTON = 0;
     static final int UI_DISABLE_ANALYSIS_BUTTON = 1;
     static final int UI_UPDATE_GRAPH = 2;
-    static final int UI_UPDATE_FPS_VALUE = 3;
+    static final int UI_UPDATE_VALUES = 3;
     static final String UI_UPDATE_FPS_VALUE_KEY = "fps";
+    static final String UI_UPDATE_PULSE_VALUE_KEY = "pulse";
 
     // model members
     private BloodAnalysisSession mBloodAnalysisSession;
@@ -85,7 +86,7 @@ public class BloodAnalysisActivity extends AppCompatActivity {
         mRedLineChart.getDescription().setEnabled(false);
         mRedLineChart.setNoDataText(getString(R.string.activity_blood_analysis_no_data_graph_txt));
         mInfoText = findViewById(R.id.activity_blood_analysis_info_txt);
-        mInfoText.setText(String.format(getString(R.string.activity_blood_analysis_info_txt), 0));
+        mInfoText.setText(String.format(getString(R.string.activity_blood_analysis_info_txt), 0f));
         mAnalysisParamText = findViewById(R.id.activity_blood_analysis_param_txt);
         mAnalysisParamText.setText(String.format(getString(R.string.activity_blood_analysis_param_txt), 0f));
 
@@ -150,18 +151,16 @@ public class BloodAnalysisActivity extends AppCompatActivity {
                         mStartButton.setEnabled(false);
                         break;
                     case UI_UPDATE_GRAPH:
-                        // Plot Red Mean
-                        //LineDataSet dataSet = new LineDataSet(GraphTools.FrameInfoArrayToListEntry(mBloodAnalysisSession.getFramesInfo()), "PPG value");
-                        LineDataSet dataSet = new LineDataSet(GraphTools.BloodAnalysisSessionToListEntry(mBloodAnalysisSession), "PPG value");
-                        dataSet.setColor(Color.RED);
-                        dataSet.setValueTextColor(Color.RED);
-                        dataSet.setDrawCircles(false);
-                        mRedLineChart.setData(new LineData(dataSet));
+                        // Convert blood analysis session to plots
+                        mRedLineChart.setData(GraphTools.BloodAnalysisSessionToLineData(mBloodAnalysisSession));
                         // Refresh
                         mRedLineChart.invalidate();
                         break;
-                    case UI_UPDATE_FPS_VALUE:
+                    case UI_UPDATE_VALUES:
                         mAnalysisParamText.setText(String.format(getString(R.string.activity_blood_analysis_param_txt), Float.parseFloat(msg.getData().getString(UI_UPDATE_FPS_VALUE_KEY))));
+                        if(msg.getData().containsKey(UI_UPDATE_PULSE_VALUE_KEY)){
+                            mInfoText.setText(String.format(getString(R.string.activity_blood_analysis_info_txt), Double.parseDouble(msg.getData().getString(UI_UPDATE_PULSE_VALUE_KEY))));
+                        }
                         break;
                 }
             }
@@ -202,8 +201,8 @@ public class BloodAnalysisActivity extends AppCompatActivity {
                 // Recover image
                 Image img = image.getImage();
 
-                // A bundle to update fps in GUI in main thread
-                Bundle bundleFps = new Bundle();
+                // A bundle to update fps and heartbeat in GUI in main thread
+                Bundle bundleValues = new Bundle();
 
                 // If the analysis is not running yet
                 if(!mAnalysisIsActive){
@@ -214,20 +213,21 @@ public class BloodAnalysisActivity extends AppCompatActivity {
                     }else{
                         mImageAnalysisHandler.obtainMessage(UI_DISABLE_ANALYSIS_BUTTON).sendToTarget();
                     }
-                    bundleFps.putString(UI_UPDATE_FPS_VALUE_KEY, Float.toString(currentFrameInfo.getFps()));
+                    bundleValues.putString(UI_UPDATE_FPS_VALUE_KEY, Float.toString(currentFrameInfo.getFps()));
                 }else{
                     // The analysis is running :
                     mBloodAnalysisSession.process(img, mLastTimestamp);
                     // Update GUI
                     mImageAnalysisHandler.obtainMessage(UI_UPDATE_GRAPH).sendToTarget();
-                    bundleFps.putString(UI_UPDATE_FPS_VALUE_KEY, Float.toString(mBloodAnalysisSession.getFramesInfo().get(mBloodAnalysisSession.getFramesInfo().size()-1).getFps()));
+                    bundleValues.putString(UI_UPDATE_FPS_VALUE_KEY, Float.toString(mBloodAnalysisSession.getFramesInfo().get(mBloodAnalysisSession.getFramesInfo().size()-1).getFps()));
+                    bundleValues.putString(UI_UPDATE_PULSE_VALUE_KEY, Double.toString(mBloodAnalysisSession.getHeartbeatAt(mBloodAnalysisSession.getFramesInfo().size()-1)));
                 }
                 // Save last timestamp
                 mLastTimestamp = img.getTimestamp();
                 // Send message to update fps
-                Message msgFps = mImageAnalysisHandler.obtainMessage(UI_UPDATE_FPS_VALUE);
-                msgFps.setData(bundleFps);
-                mImageAnalysisHandler.sendMessage(msgFps);
+                Message msgValues = mImageAnalysisHandler.obtainMessage(UI_UPDATE_VALUES);
+                msgValues.setData(bundleValues);
+                mImageAnalysisHandler.sendMessage(msgValues);
 
                 // Close image to allow to take other frames
                 image.close();
