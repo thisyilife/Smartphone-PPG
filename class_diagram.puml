@@ -1,0 +1,112 @@
+@startuml
+left to right direction
+
+interface AdapterView.OnItemClickListener
+
+package controler{
+class GraphTools {
++ {static} List<Entry> FrameInfoArrayToListEntry( frameInfoArray : ArrayList<FrameInfo>)
++ {static} List<Entry> BloodAnalysisSessionToListEntry(b : BloodAnalysisSession)
+}
+
+class MainActivity extends AppCompatActivity{
+- mWelcomeMsg : TextView
+- mBloodAnalysisMenuButton, mStatisticsMenuButton, mTutorialMenuButton : Button
+# onCreate(savedInstanceState : Bundle)
+}
+
+class StatisticsActivity extends AppCompatActivity implements AdapterView.OnItemClickListener{
+- mViewKeyList : ListView
+- {static}const STORAGE_PERMISSION_CODE : final int
+- mPreferences : SharedPreferences
+- mKeyList : List<String>
+
+- statActivitySetUp()
+# onResume()
++ onCreate(savedInstanceState : Bundle )
++ checkPermission(permission : String, requestCode : int)
++ onItemClick(parent : AdapterView<?> , view : View, position : int, id : long)
+}
+
+class StatisticSession extends AppCompatActivity{
+- mLineChart : LineChart
+- mInfoText : TextView
+- mKeyPosition : int
+- mKeyList : List<String>
+- mDeleteButton : Button
+- mPreferences : SharedPreferences
+
+# onCreate(savedInstanceState : Bundle)
++ plotMemoryAnalysis()
+}
+
+class BloodAnalysisActivity extends AppCompatActivity{
+- mPreviewView : PreviewView
+- Button : mStartButton : Button
+- boolean : mAnalysisIsActive : boolean
+- LineChart : mRedLineChart : LineChart
+- TextView : mAnalysisParamText : TextView
+- TextView : mInfoText : TextView
+- {static} CAMERA_PERMISSION_CODE : final int
+- mCameraProviderFuture : ListenableFuture<ProcessCameraProvider>
+- mInmageAnlysisHandler : Handler
+- {static} UI_ENABLE_ANALYSIS_BUTTON : final int
+- {static} UI_DISABLE_ANALYSIS_BUTTON : final int
+- {static} UI_UPDATE_GRAPH : final int
+- {static} UI_UPDATE_FPS_VALUE : final int
+- {static} UI_UPDATE_FPS_VALUE_KEY : final String
+- mBloodAnalysisSession : BloodAnalysisSession
+
+# onCreate(savedInstanceState : Bundle)
+# onDestroy()
++ checkPermission(String : permission, int requestCode)
++ bindPreviewAndAnalysis(ProcessCameraProvider : cameraProvider)
++ saveAnalysisSession()
+}
+}
+
+package model{
+class BloodAnalysisSession{
+- {static} DEFAULT_ANALYSIS_DURATION : final long
+- ArrayList<FrameInfo> : mFramesInfo
++ BloodAnalysisSession()
++ getFramesInfo() : ArrayList<FrameInfo>
++ process(image : Image, lastTimestamp : long) : boolean
++ getDuration() : long
++ getHeartbeatAverage() : double
++ getHeartbeatLast() : double
++ getHeartbeatAt(Instant : Instant) : double
++ getPPGFiltered(index : int) : double
+}
+BloodAnalysisSession *-- "0..*" FrameInfo : "mFrameInfo"
+BloodAnalysisActivity *-- "1" BloodAnalysisSession : mBloodAnalysisSession
+
+class FrameInfo{
+- mTimestamp : long
+- mFps : float
+- mWidth : float
+- mHeight : int
+- mRedMean : int
+- mGreenMean : int
+- mBlueMean : int
+- mThreshold : float
+- mSumRedIntensity : int
+
++ getTimestamp() : long
++ getFps() : float
++ getSumRedIntensity() : int
++ getRedMean() : int
++ getBlueMean() : int
++ getGreenMean() : int
++ {static} clamp(val : double, min : double, max : double) : double
++ getMinMaxIntensity(bitImage : BitMap) : int[]
++ setThreshold(bitImage : BitMap)
++ getPPGValue() : float
++ computeSumIntensities(bitImage : BitMap)
++ fillInfo(image : Image, lastTimestamp : long) : boolean
++ convertYUVToBitmap(image : Image) : Bitmap
++ yuv420ToBitmap(image : Image) : Bitmap
+}
+}
+@enduml
+
