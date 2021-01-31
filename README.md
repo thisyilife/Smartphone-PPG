@@ -6,7 +6,7 @@ This repository is available on the [INSA gitlab](https://gitlab.insa-rennes.fr/
 
 This repository gathers all resources and pieces of code used to create an Android application capable of detecting vital signs of a human being using a regular smartphone camera. This project is part of the "Industrial Project" course displayed for fifth-year students of INSA rennes in the department "Electronics and Computer Engineering".
 
-Please read the project report of this project for further information.
+Please read the [report](https://www.overleaf.com/read/tnxbqmhwjvss) of this project for further information.
 
 ## Repository structure
 
