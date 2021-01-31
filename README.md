@@ -1,5 +1,7 @@
 # Smartphone_ppg repository
 
+This repository is available on the [INSA gitlab](https://gitlab.insa-rennes.fr/Sensoria_Analytics/smartphone_ppg).
+
 ## Description of repository
 
 This repository gathers all resources and pieces of code used to create an Android application capable of detecting vital signs of a human being using a regular smartphone camera. This project is part of the "Industrial Project" course displayed for fifth-year students of INSA rennes in the department "Electronics and Computer Engineering".
